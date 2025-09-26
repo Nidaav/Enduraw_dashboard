@@ -1,70 +1,81 @@
-# Getting Started with Create React App
+# Enduraw® Training Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Welcome, Daniel! This project is a data visualization dashboard designed to analyze your training activities from CSV files.
 
-## Available Scripts
+It also contains feedback on your last session, areas for improvement to help you achieve your goals as a trail runner, and a draft training plan that you could have as an Enduraw customer.
 
-In the project directory, you can run:
+This guide will walk you through cloning the repository, installing dependencies, and launching the application locally.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🚀 Getting Started
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+To run the application, you'll need Git and Node.js installed on your system.
 
-### `npm test`
+### Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Please ensure you have the following software installed:
 
-### `npm run build`
+1. **Git** (for cloning the repository)
+2. **Node.js** (version 16 or newer is recommended) and **npm** (Node Package Manager).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+You can check your Node.js and npm versions by running:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+**Bash**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+node -v
+npm -v
+```
 
-### `npm run eject`
+### Step 1: Clone the Repository
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Open your terminal (or Command Prompt/PowerShell) and run the following commands to clone the project:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+**Bash**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```
+# Clone the repository from GitHub
+git clone https://github.com/Nidaav/Enduraw_dashboard.git
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# Navigate into the project directory
+cd Enduraw_dashboard
+```
 
-## Learn More
+### Step 2: Install Dependencies
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Once you are inside the `Enduraw_dashboard` folder, use npm to install all necessary project dependencies (as listed in `package.json`):
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+**Bash**
 
-### Code Splitting
+```
+npm install
+# OR (if you prefer Yarn)
+# yarn install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+This process may take a minute or two.
 
-### Analyzing the Bundle Size
+### Step 3: Run the Application
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+After the installation is complete, you can start the application in development mode:
 
-### Making a Progressive Web App
+**Bash**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```
+npm start
+# OR (if you prefer Yarn)
+# yarn start
+```
 
-### Advanced Configuration
+The application will automatically open in your default web browser at:
+🌐 [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+It should only take a minute to load...
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Cheers,
+Léo Tanguy
 
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+![photo de profil](https://lh3.googleusercontent.com/a/ACg8ocK2A-k2U9tbEjVRsLShcy1XghODYQAEQTWixHsuIl7qnr6_33M=s64-c-mo)

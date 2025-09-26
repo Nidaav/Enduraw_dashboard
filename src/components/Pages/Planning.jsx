@@ -10,7 +10,7 @@ const Planning = () => {
     // Données d'entraînement
     const trainingSessions = [
         { date: '2025-09-28', workout: 'Basic endurance (1h)', details: 'Steady pace, 60-70% Max Heart Rate.' },
-        { date: '2025-09-29', workout: 'Interval training session on track (5 x 1000m)', details: 'Run 5 repetitions of 1000m at 90% Max Heart Rate, with 3-minute jog recovery.' },
+        { date: '2025-09-29', workout: 'Interval training session on track (5 x 1000m)', details: 'Run 5 repetitions of 1000m at 90% Max Heart Rate, with 2-minute jog recovery.' },
         { date: '2025-10-01', workout: 'Double session day : Basic endurance (30min) & Strength Training', details: 'Very light run at 60% Max Heart Rate just to deeply warm up the muscles. Then a trail-oriented strength training session. Working the legs in concentric and eccentric movements, as well as the core and overall stability.' },
         { date: '2025-10-02', workout: 'Basic endurance (45min)', details: 'Steady pace, 60-70% Max Heart Rate.' },
         { date: '2025-10-03', workout: 'Interval training session on trail (3 x 6min uphill)', details: 'Find a consistant hill. Set yourself around 85%-90% for 6 minutes, then walk/jog down for recovery. Focus on maintaining power throughout the interval.' },
@@ -95,6 +95,12 @@ const Planning = () => {
 
             <h4>The proposed plan is for guidance only. It aims to improve your performance in short trail runs but does not take into account your specific physical characteristics, training load, lifestyle, or daily constraints.</h4>
             <h4>For a tailor-made plan and to discuss your goals with a coach, subscribe to Enduraw® personalized support. </h4>
+
+            <div className="button-container">
+                <button className="training-plan-button">
+                    Become an Enduraw® customer
+                </button>
+            </div>
         </div>
     );
 };
