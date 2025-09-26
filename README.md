@@ -19,7 +19,7 @@ Please ensure you have the following software installed:
 1. **Git** (for cloning the repository)
 2. **Node.js** (version 16 or newer is recommended) and **npm** (Node Package Manager).
 
-You can check your Node.js and npm versions by running:
+You can check your Node.js and npm versions by running these lines in a terminal :
 
 **Bash**
 
@@ -30,7 +30,11 @@ npm -v
 
 ### Step 1: Clone the Repository
 
-Open your terminal (or Command Prompt/PowerShell) and run the following commands to clone the project:
+Create a new folder called “**Technical test for Enduraw (LT)**”, then right-click and select “**Open in Terminal**.”
+If you have **Visual Studio Code** installed, you can right-click and select “**Open with Code**” (this option is usually hidden in “Show more options” if you are using Windows 11).
+This will allow you to view the code used to create this React application.
+
+Once the terminal is open (or Command Prompt/PowerShell), run the following commands to clone the project:
 
 **Bash**
 
@@ -72,6 +76,8 @@ The application will automatically open in your default web browser at:
 🌐 [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000)
 
 It should only take a minute to load...
+
+Enjoy viewing your session data and receiving feedback on this session and your training beliefs !
 
 ---
 

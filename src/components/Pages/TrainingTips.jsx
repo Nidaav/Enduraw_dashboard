@@ -53,7 +53,7 @@ const TrainingTips = () => {
       </ul>
       <p><strong>Cross-Training:</strong> Consider adding other activities like hiking or cycling. These can help build endurance without the high impact of running, promoting active recovery and reducing injury risk.</p>
 
-      <p>In summary, track work is an excellent progression tool for precision training, but your progress will benefit from more trail-specific sessions to fully meet your performance goals. By diversifying your routine, you’ll build a more complete profile as a runner, ready for any challenge the trails throw at you.</p> 
+      <p>To summarize and answer your main question, track work is an excellent progression tool for precision training, but your progress will benefit from more trail-specific sessions to fully meet your performance goals. By diversifying your routine, you’ll build a more complete profile as a runner, ready for any challenge the trails throw at you.</p> 
       <div className="button-container">
         <button onClick={handleViewPlan} className="training-plan-button">
           See Proposed Training Plan
