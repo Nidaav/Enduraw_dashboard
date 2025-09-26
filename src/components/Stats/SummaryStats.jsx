@@ -10,20 +10,28 @@ const SummaryStats = ({ stats }) => {
   };
 
   const statCards = [
-    { label: 'Durée', value: formatDuration(stats.duration), unit: '' },
-    { label: 'Distance', value: (stats.distance / 1000).toFixed(2), unit: 'km' },
-    { label: 'Vitesse moy.', value: stats.avgSpeed.toFixed(1), unit: 'km/h' },
-    { label: 'Vitesse max', value: stats.maxSpeed.toFixed(1), unit: 'km/h' },
-    { label: 'FC moy.', value: stats.avgHeartRate.toFixed(0), unit: 'bpm' },
-    { label: 'Dénivelé+', value: stats.elevationGain.toFixed(0), unit: 'm' }
+    { label: 'Duration ', value: formatDuration(stats.duration), unit: '(min)' },
+    { label: 'Distance ', value: (stats.distance / 1000).toFixed(2), unit: '(km)' },
+    { label: 'Average speed ', value: stats.avgSpeed.toFixed(1), unit: '(km/h)' },
+    { label: 'Max speed ', value: stats.maxSpeed.toFixed(1), unit: '(km/h)' },
+    { label: 'Average HR ', value: stats.avgHeartRate.toFixed(0), unit: '(bpm)' },
+    { label: 'Max HR ', value: stats.maxHeartRate.toFixed(0), unit: '(bpm)' },
+    { label: 'Elevation gain ', value: stats.elevationGain.toFixed(0), unit: '(m+)' }
   ];
 
+  const statsContainerStyle = {
+    display: 'flex',
+    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    gap: '20px',
+  };
+
   return (
-    <div className="stats-section">
+    <div style={statsContainerStyle} className="stats-section">
       {statCards.map((stat, index) => (
         <div key={index} className="stat-card">
-          <div className="stat-value">{stat.value}</div>
           <div className="stat-label">{stat.label} {stat.unit}</div>
+          <div className="stat-value">{stat.value}</div>
         </div>
       ))}
     </div>

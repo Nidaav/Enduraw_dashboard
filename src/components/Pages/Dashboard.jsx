@@ -1,0 +1,122 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useActivityData } from '../../hooks/useActivityData';
+import SpeedChart from '../Charts/SpeedChart';
+import HeartRateChart from '../Charts/HeartRateChart';
+import CadenceChart from '../Charts/CadenceChart';
+import VerticalOscillationChart from '../Charts/VerticalOscillationChart';
+import StepLengthChart from '../Charts/StepLengthChart';
+import AltitudeChart from '../Charts/AltitudeChart';
+import TemperatureChart from '../Charts/TemperatureChart';
+import SummaryStats from '../Stats/SummaryStats';
+import LapSelector from '../Controls/LapSelector';
+import MetricToggles from '../Controls/MetricToggles';
+
+const Dashboard = ({ csvText }) => {
+  
+  const navigate = useNavigate();
+
+  const handleViewPlan = () => {
+    navigate('/tips');
+  };
+  const {
+    activityData,
+    filteredData,
+    stats,
+    selectedLap,
+    setSelectedLap,
+    timeRange,
+    setTimeRange
+  } = useActivityData(csvText);
+
+  const [visibleCharts, setVisibleCharts] = useState({
+    speed: true,
+    heartRate: true,
+    cadence: true,
+    verticalOscillation: true,
+    stepLength: true,
+    altitude: false,
+    temperature: false
+  });
+
+  if (!activityData) {
+    return <div className="loading">Loading data...</div>;
+  }
+
+  const lapsToRender = activityData.laps || [];
+
+  return (
+    <div className="dashboard">
+      <header className="dashboard-header">
+        <h1>Training Analysis</h1>
+        <h3>Here are the statistics from your last session</h3>
+        <div className="dashboard-controls">
+          <LapSelector 
+            laps={lapsToRender}
+            selectedLap={selectedLap}
+            onLapChange={setSelectedLap}
+          />
+          <MetricToggles
+            visibleCharts={visibleCharts}
+            onToggleChange={setVisibleCharts}
+          />
+        </div>
+      </header>
+
+      <div className="stats-section">
+        <SummaryStats stats={stats} />
+      </div>
+
+      <div className="charts-grid">
+        {visibleCharts.speed && (
+          <div className="chart-container">
+            <SpeedChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
+          </div>
+        )}
+        
+        {visibleCharts.heartRate && (
+          <div className="chart-container">
+            <HeartRateChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
+          </div>
+        )}
+        
+        {visibleCharts.cadence && (
+          <div className="chart-container">
+            <CadenceChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
+          </div>
+        )}
+
+        {visibleCharts.verticalOscillation && (
+          <div className="chart-container">
+            <VerticalOscillationChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
+          </div>
+        )}
+
+        {visibleCharts.stepLength && (
+          <div className="chart-container">
+            <StepLengthChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
+          </div>
+        )}
+
+         {visibleCharts.altitude && (
+          <div className="chart-container">
+            <AltitudeChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
+          </div>
+        )}
+        
+        {visibleCharts.temperature && (
+          <div className="chart-container">
+            <TemperatureChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
+          </div>
+        )}
+      </div>
+      <div className="button-container">
+        <button onClick={handleViewPlan} className="training-plan-button">
+          See feedbacks on your session 
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

@@ -34,7 +34,10 @@ const parseValue = (value) => {
 };
 
 export const detectLaps = (points) => {
-  const lapNumbers = [...new Set(points.map(p => p.lap_number).filter(Boolean))];
+
+  const lapNumbers = [...new Set(points.map(p => p["lap_number "]).filter(Boolean))];
+  // const lapNumbers = [...new Set(points.map(p => p["lap_number "]).filter(p => p !== null && p !== undefined))];
+
   return lapNumbers.map(lapNumber => {
     const lapPoints = points.filter(p => p.lap_number === lapNumber);
     return {
@@ -48,14 +51,15 @@ export const detectLaps = (points) => {
 
 export const calculateStats = (data) => {
   const speeds = data.map(p => p.speed || p.enhanced_speed).filter(Boolean);
+  const speedsInKmH = speeds.map(s => s * 3.6);
   const heartRates = data.map(p => p.heart_rate).filter(Boolean);
   const altitudes = data.map(p => p.altitude || p.enhanced_altitude).filter(Boolean);
-  
+
   return {
     duration: data.length > 0 ? data[data.length - 1].timestamp - data[0].timestamp : 0,
     distance: data.length > 0 ? data[data.length - 1].distance - data[0].distance : 0,
-    avgSpeed: speeds.length > 0 ? speeds.reduce((a, b) => a + b) / speeds.length : 0,
-    maxSpeed: Math.max(...speeds),
+    avgSpeed: speedsInKmH.length > 0 ? speedsInKmH.reduce((a, b) => a + b) / speedsInKmH.length : 0,
+    maxSpeed: Math.max(...speedsInKmH),
     avgHeartRate: heartRates.length > 0 ? heartRates.reduce((a, b) => a + b) / heartRates.length : 0,
     maxHeartRate: Math.max(...heartRates),
     elevationGain: calculateElevationGain(altitudes)

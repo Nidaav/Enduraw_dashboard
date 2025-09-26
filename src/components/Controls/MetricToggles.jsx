@@ -10,7 +10,7 @@ const MetricToggles = ({ visibleCharts, onToggleChange }) => {
 
   return (
     <div className="control-group">
-      <label>Métriques affichées</label>
+      <label>Metrics displayed</label>
       <div className="metric-toggles">
         {Object.entries(visibleCharts).map(([chart, isVisible]) => (
           <label key={chart} className="toggle-label">
@@ -19,11 +19,13 @@ const MetricToggles = ({ visibleCharts, onToggleChange }) => {
               checked={isVisible}
               onChange={() => toggleChart(chart)}
             />
-            {chart === 'speed' && 'Vitesse'}
-            {chart === 'heartRate' && 'FC'}
-            {chart === 'altitude' && 'Altitude'}
-            {chart === 'cadence' && 'Cadence'}
-            {chart === 'temperature' && 'Température'}
+            {chart === 'speed' && 'Speed (km/h)'}
+            {chart === 'heartRate' && 'Heart rate (bpm)'}
+            {chart === 'cadence' && 'Cadence (rpm)'}
+            {chart === 'verticalOscillation' && 'Vertical oscillation (mm)'}
+            {chart === 'stepLength' && 'Stride length (mm)'}
+            {chart === 'altitude' && 'Altitude (m)'}
+            {chart === 'temperature' && 'Temperature (°C)'}
           </label>
         ))}
       </div>
