@@ -8,6 +8,7 @@ import VerticalOscillationChart from '../Charts/VerticalOscillationChart';
 import StepLengthChart from '../Charts/StepLengthChart';
 import AltitudeChart from '../Charts/AltitudeChart';
 import TemperatureChart from '../Charts/TemperatureChart';
+import StanceTimeChart from '../Charts/StanceTimeChart';
 import SummaryStats from '../Stats/SummaryStats';
 import LapSelector from '../Controls/LapSelector';
 import MetricToggles from '../Controls/MetricToggles';
@@ -34,6 +35,7 @@ const Dashboard = ({ csvText }) => {
     heartRate: true,
     cadence: true,
     verticalOscillation: true,
+    stanceTime: true,
     stepLength: true,
     altitude: false,
     temperature: false
@@ -89,6 +91,12 @@ const Dashboard = ({ csvText }) => {
         {visibleCharts.verticalOscillation && (
           <div className="chart-container">
             <VerticalOscillationChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
+          </div>
+        )}
+
+        {visibleCharts.stanceTime && (
+          <div className="chart-container">
+            <StanceTimeChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
           </div>
         )}
 

@@ -23,6 +23,7 @@ const MetricToggles = ({ visibleCharts, onToggleChange }) => {
             {chart === 'heartRate' && 'Heart rate (bpm)'}
             {chart === 'cadence' && 'Cadence (rpm)'}
             {chart === 'verticalOscillation' && 'Vertical oscillation (mm)'}
+            {chart === 'stanceTime' && 'Stance time (ms)'}
             {chart === 'stepLength' && 'Stride length (mm)'}
             {chart === 'altitude' && 'Altitude (m)'}
             {chart === 'temperature' && 'Temperature (°C)'}

@@ -41,7 +41,7 @@ export const useActivityData = (csvData) => {
     const stats = useMemo(() => {
         return filteredData ? calculateStats(filteredData) : null;
     }, [filteredData]);
-
+    console.log('filteredData', filteredData)
     return {
         activityData,
         filteredData,
