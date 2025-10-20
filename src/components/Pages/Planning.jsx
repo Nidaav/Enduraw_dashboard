@@ -9,12 +9,12 @@ const Planning = () => {
 
     // Données d'entraînement
     const trainingSessions = [
-        { date: '2025-09-28', workout: 'Basic endurance (1h)', details: 'Steady pace, 60-70% Max Heart Rate.' },
-        { date: '2025-09-29', workout: 'Interval training session on track (5 x 1000m)', details: 'Run 5 repetitions of 1000m at 90% Max Heart Rate, with 2-minute jog recovery.' },
-        { date: '2025-10-01', workout: 'Double session day : Basic endurance (30min) & Strength Training', details: 'Very light run at 60% Max Heart Rate just to deeply warm up the muscles. Then a trail-oriented strength training session. Working the legs in concentric and eccentric movements, as well as the core and overall stability.' },
-        { date: '2025-10-02', workout: 'Basic endurance (45min)', details: 'Steady pace, 60-70% Max Heart Rate.' },
-        { date: '2025-10-03', workout: 'Interval training session on trail (3 x 6min uphill)', details: 'Find a consistant hill. Set yourself around 85%-90% for 6 minutes, then walk/jog down for recovery. Focus on maintaining power throughout the interval.' },
-        { date: '2025-10-04', workout: 'Long run (1h30)', details: 'Aerobic zone: bring a small backpack with sports drinks and food to simulate race conditions.' },
+        { date: '2025-10-20', workout: 'Basic endurance (1h)', details: 'Steady pace, 60-70% Max Heart Rate.' },
+        { date: '2025-10-21', workout: 'Interval training session on track (5 x 1000m)', details: 'Run 5 repetitions of 1000m at 90% Max Heart Rate, with 2-minute jog recovery.' },
+        { date: '2025-10-23', workout: 'Double session day : Basic endurance (30min) & Strength Training', details: 'Very light run at 60% Max Heart Rate just to deeply warm up the muscles. Then a trail-oriented strength training session. Working the legs in concentric and eccentric movements, as well as the core and overall stability.' },
+        { date: '2025-10-24', workout: 'Basic endurance (45min)', details: 'Steady pace, 60-70% Max Heart Rate.' },
+        { date: '2025-10-25', workout: 'Interval training session on trail (3 x 6min uphill)', details: 'Find a consistant hill. Set yourself around 85%-90% for 6 minutes, then walk/jog down for recovery. Focus on maintaining power throughout the interval.' },
+        { date: '2025-10-26', workout: 'Long run (1h30)', details: 'Aerobic zone: bring a small backpack with sports drinks and food to simulate race conditions.' },
     ];
 
     const findWorkout = (dateString) => {
