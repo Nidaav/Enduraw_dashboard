@@ -5,10 +5,11 @@ const SpeedChart = ({ data, timeRange, onBrushChange}) => {
   const formatData = (data) => {
     return data.map((point, index) => ({
       index,
-      timestamp: point.timestamp,
-      speed: ((point.speed || point.enhanced_speed) * 3.6).toFixed(2),
-      distance: point.distance,
-      lap: point.lap_number
+      elapsed_time: point.elapsed_time_min_sec,
+      speed: point.speed_kmh,
+      distance: (point.distance)/1000,
+      lap: point.lap_number,
+
     }));
   };
 
@@ -22,17 +23,35 @@ const SpeedChart = ({ data, timeRange, onBrushChange}) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey="index"
+            interval={75}
             tickFormatter={(value) => {
               const point = chartData[value];
-              return point ? new Date(point.timestamp).toLocaleTimeString() : '';
+              return point ? point.elapsed_time : '';
             }}
+            label={{ 
+              value: 'min:sec', 
+              position: 'right', 
+              offset: 15, 
+              dy: 14,
+              style: { textAnchor: 'end' }
+             }}
           />
-          <YAxis domain={['auto', 'auto']} />
+          <YAxis 
+            domain={['auto', 'auto']}
+            label={{ 
+                value: 'km/h', 
+                position: 'top', 
+                offset: 5, 
+                angle: -90,
+                dy: 22,
+                dx: -20,
+             }}
+          />
           <Tooltip
             formatter={(value) => [`${value} km/h`, 'Speed']}
             labelFormatter={(index) => {
               const point = chartData[index];
-              return point ? `Distance: ${point.distance.toFixed(2)}m - ${new Date(point.timestamp).toLocaleTimeString()}` : '';
+              return point ? `${point.distance.toFixed(2)} kms - ${point.elapsed_time} min` : '';
             }}
           />
           <Area 

@@ -37,8 +37,8 @@ const Dashboard = ({ csvText }) => {
     verticalOscillation: true,
     stanceTime: true,
     stepLength: true,
-    altitude: false,
-    temperature: false
+    altitude: true,
+    temperature: true
   });
 
   if (!activityData) {

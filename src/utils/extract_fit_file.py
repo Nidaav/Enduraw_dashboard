@@ -12,7 +12,20 @@ import numpy as np
 #
 # Fichier créé: activity_data.csv
 
+# Facteur de conversion de la vitesse: 1 m/s = 3.6 km/h
 MS_TO_KMH = 3.6
+
+# Seuil pour la détection des arrêts longs et immobiles
+PAUSE_TIME_THRESHOLD_S = 10.0 # Écart de temps minimum pour suspecter une pause
+PAUSE_DISTANCE_THRESHOLD_M = 1.0 # Écart de distance maximum pour confirmer l'immobilité
+
+def format_seconds_to_min_sec(seconds):
+        if pd.isna(seconds):
+            return None
+        total_seconds = int(seconds)
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        return f"{minutes:02d}:{seconds:02d}"
 
 def parse_fit(path):
     ff = FitFile(path)
@@ -43,7 +56,7 @@ def parse_fit(path):
     
         # Crée la colonne de temps écoulé en secondes (pour toute la séance)
         df['elapsed_time_s'] = (df['timestamp'] - df['timestamp'].iloc[0]).dt.total_seconds()
-        
+    
     # 3. Conversion de la vitesse m/s -> km/h
     if 'speed' in df.columns:
         # Calcule et arrondit 'speed_kmh' à 2 décimales
@@ -73,16 +86,48 @@ def parse_fit(path):
         df['elapsed_time_in_lap_s'] = df['elapsed_time_s'] - lap_start_time
         df['elapsed_time_in_lap_s'] = np.round(df['elapsed_time_in_lap_s'], 1)
 
-    # 7. Suppression des colonnes indésirables
-    # Utiliser errors='ignore' pour les colonnes qui pourraient ne pas exister dans le .fit
+    # 7. Ajout des colonnes demandées
+    
+    # 7.A Colonne de temps d'activité cumulé (moving_elapsed_time_s)
+    if 'elapsed_time_s' in df.columns and 'distance' in df.columns:
+        
+        # Calculer l'écart temporel et l'écart de distance avec la ligne précédente
+        df['dt'] = df['elapsed_time_s'].diff()
+        df['dd'] = df['distance'].diff().fillna(0)
+        
+        # Identifier une pause longue et immobile
+        is_break_real = (df['dt'] >= PAUSE_TIME_THRESHOLD_S) & (df['dd'] <= PAUSE_DISTANCE_THRESHOLD_M)
+        
+        # Calculer le temps de pause à soustraire (l'écart total moins 1s pour le delta normal)
+        # Le premier point (dt est NaN) est initialisé à 0
+        df['pause_correction_s'] = np.where(is_break_real, df['dt'] - 1.0, 0.0)
+        df.loc[0, 'pause_correction_s'] = 0.0
+        
+        # Calculer le temps de pause cumulé
+        df['cumulative_pause_s'] = df['pause_correction_s'].cumsum()
+        
+        # Calculer le temps d'activité réel (Temps total - Temps de pause cumulé)
+        df['moving_elapsed_time_s'] = df['elapsed_time_s'] - df['cumulative_pause_s']
+        df['moving_elapsed_time_s'] = np.round(df['moving_elapsed_time_s'], 1)
+        
+        # On supprime les colonnes intermédiaires de calcul
+        df = df.drop(columns=['dt', 'dd', 'pause_correction_s', 'cumulative_pause_s'], errors='ignore')
+
+    # 7.B Colonne de temps formaté (MM:SS)
+    if 'elapsed_time_s' in df.columns:
+        df['elapsed_time_min_sec'] = df['moving_elapsed_time_s'].apply(format_seconds_to_min_sec)
+
+    # 8. Suppression des colonnes indésirables
     df = df.drop(columns=columns_to_drop, errors='ignore')
     
-    # 8. Réorganisation des colonnes principales
+    # 9. Réorganisation des colonnes principales
     
     # Définir l'ordre des colonnes principales
     col_order_priority = [
             'timestamp', 
-            'elapsed_time_s', 
+            'elapsed_time_s',
+            'moving_elapsed_time_s',
+            'elapsed_time_min_sec',
             'lap_number', 
             'elapsed_time_in_lap_s', 
             'distance', 
@@ -170,7 +215,7 @@ def main():
         sys.exit(1)
     
     fn = Path(sys.argv[1])
-    output_path_csv = Path("./public/activity_data.csv")
+    output_path_csv = Path(__file__).parent.parent.parent / "public" / "activity_data.csv"
     try:
         # Lancement de l'extraction et des traitements
         df = parse_fit(str(fn))

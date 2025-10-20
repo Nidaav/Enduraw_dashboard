@@ -5,9 +5,9 @@ const CadenceChart = ({ data, timeRange }) => {
   const formatData = (data) => {
     return data.map((point, index) => ({
       index,
-      timestamp: point.timestamp,
-      cadence: point.cadence,
-      distance: point.distance,
+      elapsed_time: point.elapsed_time_min_sec,
+      cadence: point.cadence_step_per_min,
+      distance: (point.distance)/1000,
       lap: point.lap_number
     }));
   };
@@ -22,17 +22,35 @@ const CadenceChart = ({ data, timeRange }) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey="index"
+            interval={75}
             tickFormatter={(value) => {
               const point = chartData[value];
-              return point ? new Date(point.timestamp).toLocaleTimeString() : '';
+              return point ? point.elapsed_time : '';
             }}
+            label={{ 
+              value: 'min:sec', 
+              position: 'right', 
+              offset: 15, 
+              dy: 14,
+              style: { textAnchor: 'end' }
+              }}
           />
-          <YAxis domain={['auto', 'auto']} />
+          <YAxis 
+            domain={['auto', 'auto']}
+            label={{ 
+                value: 'spm', 
+                position: 'top', 
+                offset: 5, 
+                angle: -90,
+                dy: 22,
+                dx: -20,
+              }}
+          />
           <Tooltip
             formatter={(value) => [`${value} spm`, 'Cadence']}
             labelFormatter={(index) => {
               const point = chartData[index];
-              return point ? `Distance: ${point.distance.toFixed(2)}m - ${new Date(point.timestamp).toLocaleTimeString()}` : '';
+              return point ? `${point.distance.toFixed(2)} kms - ${point.elapsed_time} min` : '';
             }}
           />
           <Area 
