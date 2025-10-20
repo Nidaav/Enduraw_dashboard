@@ -1,6 +1,8 @@
 # Enduraw® Training Dashboard
 
-Welcome, Daniel! This project is a data visualization dashboard designed to analyze your training activities from CSV files.
+Welcome !
+
+This project is a data visualization dashboard designed to analyze your training activities from CSV files.
 
 It also contains feedback on your last session, areas for improvement to help you achieve your goals as a trail runner, and a draft training plan that you could have as an Enduraw customer.
 

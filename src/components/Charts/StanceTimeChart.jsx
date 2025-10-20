@@ -22,12 +22,13 @@ const StanceTimeChart = ({ data, timeRange }) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey="index"
+            unit="min"
             tickFormatter={(value) => {
               const point = chartData[value];
               return point ? new Date(point.timestamp).toLocaleTimeString() : '';
             }}
           />
-          <YAxis domain={['auto', 'auto']} />
+          <YAxis domain={['auto', 'auto']} unit="ms"/>
           <Tooltip
             formatter={(value) => [`${value} ms`, 'Stance time']}
             labelFormatter={(index) => {
@@ -38,8 +39,8 @@ const StanceTimeChart = ({ data, timeRange }) => {
           <Area 
             type="monotone" 
             dataKey="stanceTime" 
-            stroke="#594c92ff" 
-            fill="#594c92ff" 
+            stroke="#a53862ff" 
+            fill="#a53862ff" 
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}
