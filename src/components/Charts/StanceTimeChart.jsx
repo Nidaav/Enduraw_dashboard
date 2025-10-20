@@ -5,9 +5,9 @@ const StanceTimeChart = ({ data, timeRange }) => {
   const formatData = (data) => {
     return data.map((point, index) => ({
       index,
-      timestamp: point.timestamp,
-      stanceTime: point.stance_time,
-      distance: point.distance,
+      elapsed_time: point.elapsed_time_min_sec,
+      stanceTime: point.stance_time_percent,
+      distance: (point.distance)/1000,
       lap: point.lap_number
     }));
   };
@@ -16,24 +16,41 @@ const StanceTimeChart = ({ data, timeRange }) => {
 
   return (
     <div className="chart">
-      <h3>Stance time (ms)</h3>
+      <h3>Stance time percent (%)</h3>
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey="index"
-            unit="min"
+            interval={75}
             tickFormatter={(value) => {
               const point = chartData[value];
-              return point ? new Date(point.timestamp).toLocaleTimeString() : '';
+              return point ? point.elapsed_time : '';
             }}
+            label={{ 
+              value: 'min:sec', 
+              position: 'right', 
+              offset: 15, 
+              dy: 14,
+              style: { textAnchor: 'end' }
+              }}
           />
-          <YAxis domain={['auto', 'auto']} unit="ms"/>
+          <YAxis 
+            domain={['auto', 'auto']}
+            label={{ 
+                value: '%', 
+                position: 'top', 
+                offset: 5, 
+                angle: -90,
+                dy: 22,
+                dx: -20,
+              }}
+          />
           <Tooltip
-            formatter={(value) => [`${value} ms`, 'Stance time']}
+            formatter={(value) => [`${value} %`, 'Stance time percent']}
             labelFormatter={(index) => {
               const point = chartData[index];
-              return point ? `` : '';
+              return point ? `${point.distance.toFixed(2)} kms - ${point.elapsed_time} min` : '';
             }}
           />
           <Area 
