@@ -56,8 +56,8 @@ const HeartRateChart = ({ data, timeRange }) => {
           <Area 
             type="monotone" 
             dataKey="heartRate" 
-            stroke="#ff7300"
-            fill="#ff7300" 
+            stroke="#a53862ff"
+            fill="#a53862ff" 
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}

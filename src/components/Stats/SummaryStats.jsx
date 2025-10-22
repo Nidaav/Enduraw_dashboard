@@ -10,7 +10,7 @@ const SummaryStats = ({ stats }) => {
   };
 
   const statCards = [
-    { label: 'Duration ', value: formatDuration(stats.duration), unit: '(min)' },
+    { label: 'Time in motion ', value: stats.duration, unit: '(min)' },
     { label: 'Distance ', value: (stats.distance / 1000).toFixed(2), unit: '(km)' },
     { label: 'Average speed ', value: stats.avgSpeed.toFixed(1), unit: '(km/h)' },
     { label: 'Max speed ', value: stats.maxSpeed.toFixed(1), unit: '(km/h)' },

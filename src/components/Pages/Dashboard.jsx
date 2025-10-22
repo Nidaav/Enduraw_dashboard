@@ -9,6 +9,7 @@ import StepLengthChart from '../Charts/StepLengthChart';
 import AltitudeChart from '../Charts/AltitudeChart';
 import TemperatureChart from '../Charts/TemperatureChart';
 import StanceTimeChart from '../Charts/StanceTimeChart';
+import MultiMetricChart from '../Charts/MultiMetricChart';
 import SummaryStats from '../Stats/SummaryStats';
 import LapSelector from '../Controls/LapSelector';
 import MetricToggles from '../Controls/MetricToggles';
@@ -67,6 +68,10 @@ const Dashboard = ({ csvText }) => {
 
       <div className="stats-section">
         <SummaryStats stats={stats} />
+      </div>
+
+      <div className="chart-container">
+        <MultiMetricChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
       </div>
 
       <div className="charts-grid">
