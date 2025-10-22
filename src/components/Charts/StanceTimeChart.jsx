@@ -56,8 +56,8 @@ const StanceTimeChart = ({ data, timeRange }) => {
           <Area 
             type="monotone" 
             dataKey="stanceTime" 
-            stroke="#a53862ff" 
-            fill="#a53862ff" 
+            stroke="#ff7300" 
+            fill="#ff7300" 
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}

@@ -16,6 +16,7 @@
     "react-router-dom": "^7.9.2",
     "react-scripts": "5.0.1",
     "recharts": "^3.2.1",
+    "seaborn": "^0.0.1-security",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

@@ -50,16 +50,15 @@ export const detectLaps = (points) => {
 };
 
 export const calculateStats = (data) => {
-  const speeds = data.map(p => p.speed || p.enhanced_speed).filter(Boolean);
-  const speedsInKmH = speeds.map(s => s * 3.6);
+  const speeds = data.map(p => p.speed_kmh).filter(Boolean);
   const heartRates = data.map(p => p.heart_rate).filter(Boolean);
   const altitudes = data.map(p => p.altitude || p.enhanced_altitude).filter(Boolean);
 
   return {
-    duration: data.length > 0 ? data[data.length - 1].timestamp - data[0].timestamp : 0,
+    duration: data.length > 0 ? data[data.length - 1].elapsed_time_min_sec : 0,
     distance: data.length > 0 ? data[data.length - 1].distance - data[0].distance : 0,
-    avgSpeed: speedsInKmH.length > 0 ? speedsInKmH.reduce((a, b) => a + b) / speedsInKmH.length : 0,
-    maxSpeed: Math.max(...speedsInKmH),
+    avgSpeed: speeds.length > 0 ? speeds.reduce((a, b) => a + b) / speeds.length : 0,
+    maxSpeed: Math.max(...speeds),
     avgHeartRate: heartRates.length > 0 ? heartRates.reduce((a, b) => a + b) / heartRates.length : 0,
     maxHeartRate: Math.max(...heartRates),
     elevationGain: calculateElevationGain(altitudes)
