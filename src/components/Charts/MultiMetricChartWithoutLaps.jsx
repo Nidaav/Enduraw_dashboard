@@ -3,80 +3,15 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 // Définition des métriques et de leurs propriétés
 const METRICS = {
-    speed_kmh: { 
-        name: 'Speed', 
-        color: '#8884d8', 
-        unit: 'km/h', 
-        yId: 'speed', 
-        type: 'monotone',
-        domain: ['auto', 'auto']
-    },
-    heart_rate: { 
-        name: 'HR', 
-        color: '#a53862ff', 
-        unit: 'bpm', 
-        yId: 'hr', 
-        type: 'monotone',
-        domain: ['auto', 'auto']
-    },
-    cadence: { 
-        name: 'Cadence', 
-        color: '#a4de6c', 
-        unit: 'spm', 
-        yId: 'cadence', 
-        type: 'monotone',
-        domain: ['auto', 'auto']
-    },
-    stance_time: { 
-        name: 'Stance Time ', 
-        color: '#ff7300', 
-        unit: '%', 
-        yId: 'stance_stime', 
-        type: 'monotone',
-        domain: ['auto', 'auto']
-    },
-    step_length: { 
-        name: 'Step Length ', 
-        color: '#1f77b4', 
-        unit: 'mm', 
-        yId: 'step_length', 
-        type: 'monotone',
-        domain: ['auto', 'auto']
-    },
-    vertical_oscillation: { 
-        name: 'Vertical oscillation ', 
-        color: '#9467bd', 
-        unit: 'mm', 
-        yId: 'vertical_oscillation', 
-        type: 'monotone',
-        domain: ['auto', 'auto']
-    },
-    temperature: { 
-        name: 'Temperature', 
-        color: '#ffc658', 
-        unit: '°C', 
-        yId: 'temp', 
-        type: 'monotone',
-        domain: [20, 30] // Domaine pour la température, ajustez si nécessaire
-    },
-    altitude: { 
-        name: 'Altitude', 
-        color: '#00c49f', 
-        unit: 'm', 
-        yId: 'alt', 
-        type: 'monotone',
-        domain: ['auto', 'auto']
-    },
-    lap_number: { 
-        name: 'Lap', 
-        color: '#f54291', 
-        unit: '', 
-        yId: 'lap', 
-        type: 'stepAfter',
-        domain: [0, 'dataMax + 1'], // Domaine pour les laps
-        hideAxis: true // Cacher l'axe Y des laps
-    }
-    // Vous pouvez ajouter d'autres métriques comme cadence_step_per_min, etc.
+    speed_kmh: { name: 'Speed', color: '#8884d8', unit: 'km/h', yId: 'speed', type: 'monotone', domain: ['auto', 'auto'] },
+    heart_rate: { name: 'HR', color: '#a53862ff', unit: 'bpm', yId: 'hr', type: 'monotone', domain: ['auto', 'auto'] },
+    cadence: { name: 'Cadence', color: '#a4de6c', unit: 'spm', yId: 'cadence', type: 'monotone', domain: ['auto', 'auto'] },
+    stance_time: { name: 'Stance Time', color: '#ff7300', unit: '%', yId: 'stance_stime', type: 'monotone', domain: ['auto', 'auto'] },
+    step_length: { name: 'Step Length', color: '#1f77b4', unit: 'mm', yId: 'step_length', type: 'monotone', domain: ['auto', 'auto'] },
+    vertical_oscillation: { name: 'Vertical oscillation', color: '#9467bd', unit: 'mm', yId: 'vertical_oscillation', type: 'monotone', domain: ['auto', 'auto'] },
+    temperature: { name: 'Temperature', color: '#ffc658', unit: '°C', yId: 'temp', type: 'monotone', domain: ['auto', 'auto'] },
+    altitude: { name: 'Altitude', color: '#00c49f', unit: 'm', yId: 'alt', type: 'monotone', domain: ['auto', 'auto'] },
+    // lap_number: { name: 'Lap', color: '#f54291', isFilter: true } 
 };
 
 const MultiMetricChart = ({ data }) => {
