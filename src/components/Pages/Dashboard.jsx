@@ -11,7 +11,6 @@ import TemperatureChart from '../Charts/TemperatureChart';
 import StanceTimeChart from '../Charts/StanceTimeChart';
 import MultiMetricChart from '../Charts/MultiMetricChart';
 import SummaryStats from '../Stats/SummaryStats';
-import LapSelector from '../Controls/LapSelector';
 import MetricToggles from '../Controls/MetricToggles';
 
 const Dashboard = ({ csvText }) => {
@@ -25,8 +24,6 @@ const Dashboard = ({ csvText }) => {
     activityData,
     filteredData,
     stats,
-    selectedLap,
-    setSelectedLap,
     timeRange,
     setTimeRange
   } = useActivityData(csvText);
@@ -46,19 +43,12 @@ const Dashboard = ({ csvText }) => {
     return <div className="loading">Loading data...</div>;
   }
 
-  const lapsToRender = activityData.laps || [];
-
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>Training Analysis</h1>
+        <h1>Your session data</h1>
         <h3>Here are the statistics from your last session</h3>
         <div className="dashboard-controls">
-          <LapSelector 
-            laps={lapsToRender}
-            selectedLap={selectedLap}
-            onLapChange={setSelectedLap}
-          />
           <MetricToggles
             visibleCharts={visibleCharts}
             onToggleChange={setVisibleCharts}
