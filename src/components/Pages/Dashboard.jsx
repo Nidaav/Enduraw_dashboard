@@ -18,7 +18,7 @@ const Dashboard = ({ csvText }) => {
   const navigate = useNavigate();
 
   const handleViewPlan = () => {
-    navigate('/tips');
+    navigate('/analysis');
   };
   const {
     activityData,
@@ -60,8 +60,10 @@ const Dashboard = ({ csvText }) => {
         <SummaryStats stats={stats} />
       </div>
 
-      <div className="chart-container">
-        <MultiMetricChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
+      <div className="button-container">
+        <button onClick={handleViewPlan} className="training-plan-button">
+          See the data analysis for your session
+        </button>
       </div>
 
       <div className="charts-grid">
@@ -115,7 +117,7 @@ const Dashboard = ({ csvText }) => {
       </div>
       <div className="button-container">
         <button onClick={handleViewPlan} className="training-plan-button">
-          See feedbacks on your session 
+          See the data analysis for your session
         </button>
       </div>
     </div>
