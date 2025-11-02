@@ -5,7 +5,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   const handleStart = () => {
-    navigate('/analysis');
+    navigate('/stats');
   };
 
   return (

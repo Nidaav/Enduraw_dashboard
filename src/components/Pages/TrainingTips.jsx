@@ -5,7 +5,7 @@ const TrainingTips = () => {
   const navigate = useNavigate();
 
   const handleViewPlan = () => {
-    navigate('/planning');
+    navigate('/tips');
   };
 
   const listGestion = {
@@ -17,7 +17,6 @@ const TrainingTips = () => {
   return (
     <div className="page-container">
       <h1>Session Summary</h1>
-      <h2>Workout: 2 × [8 × (200 m at VO2 max pace – 100 m jog recovery)]</h2>
       
       <p><strong>Pace:</strong> Speed increased gradually throughout the reps. Early intervals were run in about 38 seconds, dropping to 36 seconds, with a final top speed of 23.1 km/h.</p>
       <p><strong>Heart Rate:</strong> Recovery between efforts remained effective but became more challenging as the session progressed, which is normal. A peak of 192 bpm shows an excellent ability to sustain high intensity.</p>
@@ -56,7 +55,7 @@ const TrainingTips = () => {
       <p>To summarize and answer your main question, track work is an excellent progression tool for precision training, but your progress will benefit from more trail-specific sessions to fully meet your performance goals. By diversifying your routine, you’ll build a more complete profile as a runner, ready for any challenge the trails throw at you.</p> 
       <div className="button-container">
         <button onClick={handleViewPlan} className="training-plan-button">
-          See Proposed Training Plan
+          See the coach's tips 
         </button>
       </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import ScrollToTop from './utils/ScrollToTop';
 import Dashboard from './components/Pages/Dashboard';
+import Analysis from './components/Pages/Analysis';
 import Home from './components/Pages/Home';
 import TrainingTips from './components/Pages/TrainingTips';
 import Planning from './components/Pages/Planning';
@@ -32,7 +33,8 @@ function App() {
         <nav className="main-nav">
           <ul>
             <li><NavLink to="/" end>Home</NavLink></li>
-            <li><NavLink to="/analysis">Session analysis</NavLink></li>
+            <li><NavLink to="/stats">Session stats</NavLink></li>
+            <li><NavLink to="/analysis">Data analysis</NavLink></li>
             <li><NavLink to="/tips">Feedbacks on your session</NavLink></li>
             <li><NavLink to="/planning">Proposed training plan</NavLink></li>
           </ul>
@@ -41,7 +43,8 @@ function App() {
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/analysis" element={<Dashboard csvText={csvText} />} />
+          <Route path="/stats" element={<Dashboard csvText={csvText} />} />
+          <Route path="/analysis" element={<Analysis csvText={csvText} />} />
           <Route path="/tips" element={<TrainingTips />} />
           <Route path="/planning" element={<Planning />} />
         </Routes>
