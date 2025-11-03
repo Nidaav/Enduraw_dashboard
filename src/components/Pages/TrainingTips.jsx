@@ -5,7 +5,7 @@ const TrainingTips = () => {
   const navigate = useNavigate();
 
   const handleViewPlan = () => {
-    navigate('/tips');
+    navigate('/planning');
   };
 
   const listGestion = {
