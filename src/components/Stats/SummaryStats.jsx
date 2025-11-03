@@ -3,11 +3,6 @@ import React from 'react';
 const SummaryStats = ({ stats }) => {
   if (!stats) return null;
 
-  const formatDuration = (ms) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   const statCards = [
     { label: 'Time in motion ', value: stats.duration, unit: '(min)' },

@@ -50,18 +50,38 @@ export const detectLaps = (points) => {
 };
 
 export const calculateStats = (data) => {
-  const speeds = data.map(p => p.speed_kmh).filter(Boolean);
-  const heartRates = data.map(p => p.heart_rate).filter(Boolean);
-  const altitudes = data.map(p => p.altitude || p.enhanced_altitude).filter(Boolean);
+  // 1. Filtrer les données pour ne conserver que les laps de type 'Intensity'
+  const intensityData = data.filter(p => p.lap_nature === 'Intensity');
+
+  // Si aucune donnée 'Intensity' n'est présente, retourne 0 ou un objet vide pour les stats spécifiques.
+  if (intensityData.length === 0) {
+    return {
+      duration: data.length > 0 ? data[data.length - 1].elapsed_time_min_sec : '00:00',
+      distance: data.length > 0 ? data[data.length - 1].distance - data[0].distance : 0,
+      avgSpeed: 0,
+      maxSpeed: 0,
+      avgHeartRate: 0,
+      maxHeartRate: 0,
+      elevationGain: calculateElevationGain(data.map(p => p.altitude || p.enhanced_altitude).filter(Boolean))
+    };
+  }
+
+  // 2. Calculer les statistiques uniquement sur 'intensityData'
+  const speeds = intensityData.map(p => p.speed_kmh).filter(Boolean);
+  const heartRates = intensityData.map(p => p.heart_rate).filter(Boolean);
+
+  const allAltitudes = data.map(p => p.altitude || p.enhanced_altitude).filter(Boolean);
+  const totalDuration = data.length > 0 ? data[data.length - 1].elapsed_time_min_sec : '00:00';
+  const totalDistance = data.length > 0 ? data[data.length - 1].distance - data[0].distance : 0;
 
   return {
-    duration: data.length > 0 ? data[data.length - 1].elapsed_time_min_sec : 0,
-    distance: data.length > 0 ? data[data.length - 1].distance - data[0].distance : 0,
+    duration: totalDuration, 
+    distance: totalDistance, 
+    elevationGain: calculateElevationGain(allAltitudes),
     avgSpeed: speeds.length > 0 ? speeds.reduce((a, b) => a + b) / speeds.length : 0,
     maxSpeed: Math.max(...speeds),
     avgHeartRate: heartRates.length > 0 ? heartRates.reduce((a, b) => a + b) / heartRates.length : 0,
     maxHeartRate: Math.max(...heartRates),
-    elevationGain: calculateElevationGain(altitudes)
   };
 };
 

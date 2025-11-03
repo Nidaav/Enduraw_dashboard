@@ -27,6 +27,34 @@ def format_seconds_to_min_sec(seconds):
         seconds = total_seconds % 60
         return f"{minutes:02d}:{seconds:02d}"
 
+def determine_lap_nature(lap_num):
+    """
+    Détermine la nature du lap basée sur la logique personnalisée fournie par l'utilisateur.
+    - Laps 1-3: Échauffement
+    - Laps 4-19: Série 1 (Alternance Intensité/Récupération, commence par Intensité)
+    - Lap 19: Récupération Inter-séries (inclut la dernière récupération de la première série)
+    - Laps 20-35: Série 2 (Alternance Intensité/Récupération, commence par Intensité)
+    - Lap 35: Retour au calme (inclut la dernière récupération)
+    """
+
+    if 1 <= lap_num <= 3:
+        return 'Warm-up'
+
+    elif 4 <= lap_num <= 34:
+        # Lap 4 est le premier effort (Intensité). 
+        # Si (lap_num - 4) est pair (4, 6, 8...), c'est Intensité. 
+        # S'il est impair (5, 7, 9...), c'est Récupération.
+        if (lap_num - 4) % 2 == 0:
+            return 'Intensity'
+        else:
+            return 'Recovery'
+        
+    elif lap_num == 35:
+        return 'Cool-down'
+    
+    else:
+        return 'Unknown'
+    
 def parse_fit(path):
     ff = FitFile(path)
     
@@ -128,7 +156,8 @@ def parse_fit(path):
             'elapsed_time_s',
             'moving_elapsed_time_s',
             'elapsed_time_min_sec',
-            'lap_number', 
+            'lap_number',
+            'lap_nature', 
             'elapsed_time_in_lap_s', 
             'distance', 
             'speed_kmh', 
@@ -206,6 +235,9 @@ def add_lap_info(fitfile, df):
     df.loc[df['lap_number'] == 0, 'lap_number'] = len(laps_sorted)
     
     print(f"{len(laps_sorted)} laps détectés et assignés aux enregistrements")
+
+    # La colonne 'lap_number' est maintenant remplie, on peut appliquer la classification
+    df['lap_nature'] = df['lap_number'].apply(determine_lap_nature)
     
     return df
 
