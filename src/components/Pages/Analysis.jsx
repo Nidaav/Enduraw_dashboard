@@ -91,7 +91,7 @@ const TrainingTips = ({ csvText }) => {
       <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-sans">
         <div className="max-w-7xl mx-auto">
           <div className="mb-10 bg-white shadow-xl rounded-xl p-5 border-t-4 border-green-500">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="flex flex-wrap">
               {seriesComparison.map((item) => (
                 <div key={item.metric} className="p-4 bg-indigo-50 rounded-lg shadow-md">
                   <p className="text-sm font-semibold text-indigo-700">{item.metric}</p>
