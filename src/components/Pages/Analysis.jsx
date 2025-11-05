@@ -88,63 +88,57 @@ const TrainingTips = ({ csvText }) => {
       <h2>Performance Analysis by Repetition (200m)</h2>
       <p>The table below summarizes key performance metrics for the first, second, and final repetitions in the two series (S1 and S2). Metrics like **Vertical Ratio (VR)** and **Stance Time Percent (STP)** are crucial for assessing running economy.</p>
     {/* TEST DU TABLEAU JOLIIIIIIIIIIIIIIIIIIIIII */}
-      <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-sans">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-10 bg-white shadow-xl rounded-xl p-5 border-t-4 border-green-500">
-            <div className="flex flex-wrap">
-              {seriesComparison.map((item) => (
-                <div key={item.metric} className="p-4 bg-indigo-50 rounded-lg shadow-md">
-                  <p className="text-sm font-semibold text-indigo-700">{item.metric}</p>
-                  <div className="flex justify-between items-end mt-1">
-                    <div>
-                      <span className="text-xs text-gray-500">S1 Avg: </span>
-                      <span className="text-lg font-bold text-gray-800">{item.s1} {item.unit}</span>
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-500">S2 Avg: </span>
-                      <span className={`text-xl font-extrabold ${item.trend === 'Improved' ? 'text-green-600' : item.trend === 'Increased' ? 'text-red-600' : 'text-gray-800'}`}>{item.s2} {item.unit}</span>
-                    </div>
-                  </div>
-                  <p className={`text-xs mt-2 font-medium ${item.trend === 'Improved' ? 'text-green-600' : item.trend === 'Increased' ? 'text-red-600' : 'text-gray-500'}`}>
-                      {item.trend} in Series 2.
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
+      <div>
+        <div>
           {/* --- Performance Table --- */}
-          <div className="bg-white shadow-xl rounded-xl overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-indigo-600 text-white sticky top-0">
+          <div>
+            <table>
+              <thead>
                 <tr>
                   {headers.map((h, index) => (
-                    <th
-                      key={index}
-                      scope="col"
-                      className={`px-3 py-3 text-left text-xs font-medium uppercase tracking-wider ${index === 0 ? 'rounded-tl-xl' : ''}`}
-                    >
-                      {h.label} <span className="font-normal text-indigo-200">{h.unit}</span>
+                    <th key={index} scope="col">
+                      {h.label} <span>{h.unit}</span>
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody>
                 {rawPerformanceDataPerLap.map((data, index) => (
-                  <tr key={data.lap} className={`hover:bg-indigo-50 ${data.series === 2 ? 'bg-yellow-50/50' : ''}`}>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                      <span className={`inline-block w-6 h-6 text-center rounded-full text-white ${data.series === 1 ? 'bg-indigo-500' : 'bg-green-500'}`}>{data.lap}</span>
+                  <tr key={data.lap}>
+                    <td>
+                      <span>{data.lap}</span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700">{data.duration}</td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700">{data.avgSpeed}</td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm font-semibold text-red-600">{data.maxHR}</td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700">{data.avgCadence}</td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700">{data.avgVR}</td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700">{data.avgSTP}</td>
+                    <td>{data.duration}</td>
+                    <td>{data.avgSpeed}</td>
+                    <td>{data.maxHR}</td>
+                    <td>{data.avgCadence}</td>
+                    <td>{data.avgVR}</td>
+                    <td>{data.avgSTP}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div>
+            <div>
+              {seriesComparison.map((item) => (
+                <div key={item.metric}>
+                  <p>{item.metric}</p>
+                  <div>
+                    <div>
+                      <span>S1 Avg: </span>
+                      <span>{item.s1} {item.unit}</span>
+                    </div>
+                    <div>
+                      <span>S2 Avg: </span>
+                      <span>{item.s2} {item.unit}</span>
+                    </div>
+                  </div>
+                  <p>{item.trend} in Series 2.</p>
+                </div>
+              ))}
+            </div>
           </div>
           
           {/* --- Key Findings --- */}
