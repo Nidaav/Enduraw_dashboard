@@ -9,7 +9,6 @@ import StepLengthChart from '../Charts/StepLengthChart';
 import AltitudeChart from '../Charts/AltitudeChart';
 import TemperatureChart from '../Charts/TemperatureChart';
 import StanceTimeChart from '../Charts/StanceTimeChart';
-import MultiMetricChart from '../Charts/MultiMetricChart';
 import SummaryStats from '../Stats/SummaryStats';
 import MetricToggles from '../Controls/MetricToggles';
 
