@@ -106,42 +106,42 @@ def segment_activity(df):
     
     return df_laps
 
-# def split_lap_into_effort_and_recovery(df_laps):
-#     """
-#     Sous-segmente chaque Lap (300m) en Effort (200m) et Récupération (100m).
+def split_lap_into_effort_and_recovery(df_laps):
+    """
+    Sous-segmente chaque Lap (300m) en Effort (200m) et Récupération (100m).
     
-#     Args:
-#         df_laps (pd.DataFrame): DataFrame segmenté par Lap.
+    Args:
+        df_laps (pd.DataFrame): DataFrame segmenté par Lap.
         
-#     Returns:
-#         tuple: (df_efforts, df_recoveries)
-#     """
-#     efforts = []
-#     recoveries = []
+    Returns:
+        tuple: (df_efforts, df_recoveries)
+    """
+    efforts = []
+    recoveries = []
     
-#     for lap_num, group in df_laps.groupby('lap_number'):
-#         # 1. Trouver le point de bascule : environ 200m après le début du Lap
-#         start_distance = group['distance'].iloc[0]
+    for lap_num, group in df_laps.groupby('lap_number'):
+        # 1. Trouver le point de bascule : environ 200m après le début du Lap
+        start_distance = group['distance'].iloc[0]
         
-#         # Trouver l'indice où la distance est la plus proche de (start_distance + 200m)
-#         effort_end_index = (group['distance'] - (start_distance + DISTANCE_EFFORT_M)).abs().idxmin()
+        # Trouver l'indice où la distance est la plus proche de (start_distance + 200m)
+        effort_end_index = (group['distance'] - (start_distance + DISTANCE_EFFORT_M)).abs().idxmin()
         
-#         # 2. Séparation
-#         effort_segment = group.loc[:effort_end_index].copy()
-#         recovery_segment = group.loc[effort_end_index + 1:].copy()
+        # 2. Séparation
+        effort_segment = group.loc[:effort_end_index].copy()
+        recovery_segment = group.loc[effort_end_index + 1:].copy()
         
-#         # 3. Calcul de la durée et nettoyage
-#         if not effort_segment.empty:
-#             effort_segment['phase'] = 'Effort_200m'
-#             effort_segment['duration_s'] = effort_segment['elapsed_time_s'].iloc[-1] - effort_segment['elapsed_time_s'].iloc[0]
-#             efforts.append(effort_segment)
+        # 3. Calcul de la durée et nettoyage
+        if not effort_segment.empty:
+            effort_segment['phase'] = 'Effort_200m'
+            effort_segment['duration_s'] = effort_segment['elapsed_time_s'].iloc[-1] - effort_segment['elapsed_time_s'].iloc[0]
+            efforts.append(effort_segment)
 
-#         if not recovery_segment.empty:
-#             recovery_segment['phase'] = 'Recovery_100m'
-#             recovery_segment['duration_s'] = recovery_segment['elapsed_time_s'].iloc[-1] - recovery_segment['elapsed_time_s'].iloc[0]
-#             recoveries.append(recovery_segment)
+        if not recovery_segment.empty:
+            recovery_segment['phase'] = 'Recovery_100m'
+            recovery_segment['duration_s'] = recovery_segment['elapsed_time_s'].iloc[-1] - recovery_segment['elapsed_time_s'].iloc[0]
+            recoveries.append(recovery_segment)
 
-#     return pd.concat(efforts), pd.concat(recoveries)
+    return pd.concat(efforts), pd.concat(recoveries)
 
 
 # --- Fonctions d'Analyse ---

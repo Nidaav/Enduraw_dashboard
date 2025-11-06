@@ -6,7 +6,7 @@ const TemperatureChart = ({ data, timeRange }) => {
     return data.map((point, index) => ({
       index,
       elapsed_time: point.elapsed_time_min_sec,
-      temperature: point.temperature,
+      temperature: point["temperature\r"],
       distance: (point.distance)/1000,
       lap: point.lap_number
     }));

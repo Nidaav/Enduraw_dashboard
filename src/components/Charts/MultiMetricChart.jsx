@@ -4,7 +4,7 @@ import {
     ResponsiveContainer, Legend 
 } from 'recharts';
 
-// Définition des métriques et de leurs propriétés (inchangée)
+// Définition des métriques et de leurs propriétés
 const METRICS = {
     speed_kmh: { name: 'Speed', color: '#8884d8', unit: 'km/h', yId: 'speed', type: 'monotone', domain: ['auto', 'auto'] },
     heart_rate: { name: 'HR', color: '#a53862ff', unit: 'bpm', yId: 'hr', type: 'monotone', domain: ['auto', 'auto'] },
@@ -20,13 +20,15 @@ const METRICS = {
 
 
 const MultiMetricChart = ({ data }) => {
-    const [selectedLap, setSelectedLap] = useState(0); 
+    // État pour la valeur sélectionnée dans le <select> ('ALL', 'S1', '1', '2', etc.)
+    const [selectedValue, setSelectedValue] = useState('ALL'); 
     const [selectedMetrics, setSelectedMetrics] = useState(['speed_kmh', 'heart_rate']);
     
     // --- Prétraitement et identification des Laps disponibles ---
-    const { processedData, availableLaps } = useMemo(() => {
-        if (!data) return { processedData: [], availableLaps: [] };
+    const { processedData, lapOptions, seriesOptions, allOptionsMap } = useMemo(() => {
+        if (!data) return { processedData: [], lapOptions: [], seriesOptions: [], allOptionsMap: {} };
 
+        // ÉTAPE 1: Traitement initial des données
         const processed = data.map((point, index) => ({
             index,
             elapsed_time: point.elapsed_time_min_sec,
@@ -37,40 +39,85 @@ const MultiMetricChart = ({ data }) => {
             cadence: point.cadence_step_per_min,
             stance_time: point.stance_time_percent,
             step_length: point.step_length,
-            temperature: point.temperature,
+            temperature: point['temperature\r'] || point.temperature, 
             vertical_oscillation: point.vertical_oscillation,
             altitude: point.altitude,
             lap_number: point.lap_number,
             distance: (point.distance) / 1000,
         }));
         
-        const laps = [...new Set(processed.map(p => p.lap_number))]
-            .filter(n => n !== undefined && n !== null)
-            .sort((a, b) => a - b);
-            
-        return { processedData: processed, availableLaps: laps };
+        // ÉTAPE 2: Détermination des laps
+        const maxLap = processed.reduce((max, point) => Math.max(max, point.lap_number || 0), 0);
+        
+        // Options pour les laps individuels (value en string)
+        const laps = Array.from({ length: maxLap }, (_, i) => i + 1);
+        const lOptions = laps.map(lap => ({ 
+            value: lap.toString(), 
+            label: `Lap ${lap}` 
+        }));
+        
+        // Options pour les séries
+        const sOptions = [
+            { value: 'Warmup', label: 'Warm-up (Laps 1-3)', laps: [1, 2, 3] },
+            { value: 'S1', label: 'Serie 1 (Laps 4-18)', laps: Array.from({ length: 15 }, (_, i) => i + 4) },
+            { value: 'S2', label: 'Serie 2 (Laps 20-34)', laps: Array.from({ length: 15 }, (_, i) => i + 20) },
+            { value: 'Cooldown', label: 'Cool-down (Lap 35)', laps: [35] },
+            { value: 'ALL', label: 'Entire session', laps: laps },
+        ];
+        
+        // Mappage rapide pour la logique de filtrage
+        const map = {};
+        [...sOptions, ...lOptions].forEach(opt => {
+            map[opt.value] = opt;
+        });
 
+        return { processedData: processed, lapOptions: lOptions, seriesOptions: sOptions, allOptionsMap: map };
     }, [data]);
-    
+
+    // --- Calcule le tableau des laps à afficher (Array de numéros) ---
+    const lapsToDisplay = useMemo(() => {
+        if (selectedValue === 'ALL' && allOptionsMap['ALL']) {
+            return allOptionsMap['ALL'].laps;
+        }
+
+        // Si la valeur est une série ('S1', 'Warmup', etc.)
+        if (allOptionsMap[selectedValue] && allOptionsMap[selectedValue].laps) {
+            return allOptionsMap[selectedValue].laps;
+        }
+
+        // Si la valeur est un lap individuel (nombre converti en string)
+        const lapNumber = Number(selectedValue);
+        if (lapNumber > 0) {
+            return [lapNumber];
+        }
+
+        // Par défaut (devrait être 'ALL' au début)
+        return allOptionsMap['ALL'] ? allOptionsMap['ALL'].laps : [];
+    }, [selectedValue, allOptionsMap]);
+
+
     // --- Application du filtre Lap et création de la clé d'axe X ---
+    const isSingleLapView = lapsToDisplay.length === 1 && selectedValue !== 'ALL';
+
     const chartData = useMemo(() => {
         let filteredData;
         
-        if (selectedLap === 0) {
+        // Si plus d'un lap est sélectionné (série ou tout)
+        if (lapsToDisplay.length > 1 && selectedValue === 'ALL') {
             filteredData = processedData; 
         } else {
-            filteredData = processedData.filter(point => point.lap_number === selectedLap);
+            // Filtre par le tableau des laps à afficher
+            filteredData = processedData.filter(point => lapsToDisplay.includes(point.lap_number));
         }
         
-        // Ajout de la clé 'lap_time_key' qui sera utilisée pour l'axe X.
-        // Cela garantit que le temps du Lap commence à 0 lorsque nous zoomons.
+        // Ajout de la clé 'lap_time_key' pour l'axe X
         return filteredData.map(point => ({
              ...point,
-             lap_time_key: selectedLap === 0 ? point.moving_elapsed_time_s : point.elapsed_time_in_lap_s
+             // Utilise le temps du Lap (elapsed_time_in_lap_s) uniquement si un seul lap est sélectionné
+             lap_time_key: isSingleLapView ? point.elapsed_time_in_lap_s : point.moving_elapsed_time_s
         }));
 
-    }, [processedData, selectedLap]);
-
+    }, [processedData, lapsToDisplay, isSingleLapView, selectedValue]);
 
     // Gère le changement de case à cocher (inchangé)
     const handleCheckboxChange = (key) => {
@@ -81,18 +128,14 @@ const MultiMetricChart = ({ data }) => {
         );
     };
 
-    // Gère le changement de Lap (inchangé)
+    // Gère le changement de Lap/Série (met à jour le string selectedValue)
     const handleLapChange = (event) => {
-        setSelectedLap(Number(event.target.value));
+        setSelectedValue(event.target.value);
     };
 
-
-    // Filtre les objets METRICS pour n'avoir que ceux sélectionnés
     const activeMetrics = Object.keys(METRICS)
         .filter(key => selectedMetrics.includes(key) && key !== 'lap_number');
-
     
-    // --- Configuration des Axes Y (inchangé) ---
     const yAxisConfigurations = activeMetrics
         .map((key, index) => {
             const metric = METRICS[key];
@@ -119,7 +162,6 @@ const MultiMetricChart = ({ data }) => {
             );
         });
 
-    // --- Rendu des Tracés (Area) (inchangé) ---
     const activeAreas = activeMetrics.map(key => {
         const metric = METRICS[key];
         return (
@@ -140,13 +182,10 @@ const MultiMetricChart = ({ data }) => {
         );
     });
 
-    // --- CORRECTION CLÉ 2: Custom Tooltip ---
-    const CustomTooltip = ({ active, payload, label }) => {
-        // Le Tooltip doit s'afficher si 'active' est vrai et qu'il y a des données.
+    // --- Custom Tooltip (inchangé) ---
+    const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             
-            // CORRECTION: Récupérer le point de données complet à partir du payload[0].payload, 
-            // car l'index ('label') n'est pas fiable avec un axe X de type 'number'.
             const point = payload[0].payload; 
             
             if (!point) return null;
@@ -154,14 +193,14 @@ const MultiMetricChart = ({ data }) => {
             return (
                 <div style={{ backgroundColor: '#1a1a1a', color: '#fff', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}>
                     <p className="label" style={{ fontWeight: 'bold' }}>
-                        Lap: {point.lap_number} | Dist: {point.distance.toFixed(2)}kms | Temps: {point.elapsed_time}
+                        Lap: {point.lap_number} | Dist: {point.distance.toFixed(2)}kms | Time: {point.elapsed_time}
                     </p>
                     {payload.map((p, i) => {
                         const metricConfig = METRICS[p.dataKey];
                         const unit = metricConfig ? metricConfig.unit : '';
                         return (
                             <p key={i} style={{ color: p.stroke, margin: '2px 0' }}>
-                                {`${p.name} : ${p.value !== undefined ? p.value.toFixed(2) : 'N/A'} ${unit}`}
+                                {`${p.name} : ${p.dataKey === 'temperature' ? p.value : p.value !== undefined ? p.value : 'N/A'} ${unit}`}
                             </p>
                         );
                     })}
@@ -171,29 +210,64 @@ const MultiMetricChart = ({ data }) => {
         return null;
     };
 
-    // Composant de contrôle avec les Checkboxes et le Sélecteur de Lap (inchangé)
+    // --- Composant de contrôle ---
     const Controls = () => (
-        <div style={{ marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {/* SÉLECTION DU LAP */}
+        <div 
+            className="chart-controls" 
+            style={{
+                backgroundColor: '#1E1E1E', 
+                padding: '15px',
+                borderRadius: '8px',
+                marginBottom: '20px',
+                border: '1px solid #333',
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '15px',
+            }}
+        >            
+            {/* SÉLECTION DU LAP / SÉRIE */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <label htmlFor="lap-select" style={{ fontWeight: 'bold' }}>Zoom Lap :</label>
                 <select 
                     id="lap-select" 
-                    value={selectedLap} 
+                    value={selectedValue} 
                     onChange={handleLapChange}
-                    style={{ padding: '5px', borderRadius: '4px' }}
+                    style={{
+                        padding: '8px 12px',
+                        borderRadius: '4px',
+                        backgroundColor: '#333',
+                        color: '#FAFAFA',
+                        border: '1px solid #666',
+                        minWidth: '220px',
+                        cursor: 'pointer'
+                    }}
                 >
-                    <option value={0}>Toute la séance</option>
-                    {availableLaps.map(lap => (
-                        <option key={lap} value={lap}>Lap {lap}</option>
-                    ))}
+                    <option value="ALL">Entire session</option>
+                    
+                    <optgroup label="Series">
+                        {/* Filtre de l'option ALL pour ne pas la dupliquer */}
+                        {seriesOptions
+                            .filter(opt => opt.value !== 'ALL')
+                            .map(opt => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
+                    </optgroup>
+
+                    <optgroup label="Individual Laps">
+                        {lapOptions.map(opt => (
+                            <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </option>
+                        ))}
+                    </optgroup>
                 </select>
             </div>
             
             {/* SÉLECTION DES MÉTRIQUES */}
-            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '10px' }}>
                 {Object.keys(METRICS)
-                    .filter(key => key !== 'lap_number') // Exclure le lap_number des checkboxes
+                    .filter(key => key !== 'lap_number') 
                     .map(key => (
                     <label key={key} style={{ color: METRICS[key].color, cursor: 'pointer' }}>
                         <input
@@ -212,22 +286,21 @@ const MultiMetricChart = ({ data }) => {
 
     return (
         <div className="chart">
-            <h3>Analyse Multi-Métriques</h3>
+            <h3 style={{ color: '#FAFAFA' }}>Multi-Metric Analysis</h3>
             <Controls />
             <ResponsiveContainer width="100%" height={400}>
                 <AreaChart 
                     data={chartData} 
                     margin={{ top: 10, right: 40, left: 40, bottom: 20 }}
                 >
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                     
-                    {/* --- CORRECTION CLÉ 1: Axe X --- */}
                     <XAxis 
-                        dataKey="lap_time_key" // Utiliser la clé qui contient le temps du lap en secondes
-                        type="number" // Clé importante pour que Recharts traite la donnée comme un axe de temps continu
+                        dataKey="lap_time_key" 
+                        type="number"
                         domain={['auto', 'auto']}
-                        interval="preserveStartEnd" // Meilleur intervalle pour les axes de type 'number'
-                        // Formatter la valeur (qui est en secondes) en min:sec
+                        interval="preserveStartEnd" 
+                        stroke="#FAFAFA"
                         tickFormatter={(totalSeconds) => {
                             if (totalSeconds === undefined) return '';
                             const minutes = Math.floor(totalSeconds / 60);
@@ -235,21 +308,20 @@ const MultiMetricChart = ({ data }) => {
                             return `${minutes}:${seconds.toString().padStart(2, '0')}`;
                         }}
                         label={{ 
-                            value: selectedLap === 0 ? 'Temps Total (min:sec)' : 'Temps du Lap (min:sec)', 
+                            value: isSingleLapView ? 'Lap duration (min:sec)' : 'Total duration (min:sec)', 
                             position: 'right', 
                             offset: 15, 
                             dy: 14,
-                            style: { textAnchor: 'end' }
+                            style: { textAnchor: 'end', fill: '#FAFAFA' }
                         }}
                     />
                     
                     {/* Les Axes Y filtrés */}
                     {yAxisConfigurations}
 
-                    {/* Le Tooltip corrigé */}
                     <Tooltip content={<CustomTooltip chartData={chartData} />} />
 
-                    <Legend />
+                    <Legend wrapperStyle={{ color: '#FAFAFA' }} />
 
                     {activeAreas}
                 </AreaChart>
