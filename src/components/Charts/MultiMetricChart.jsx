@@ -58,10 +58,10 @@ const MultiMetricChart = ({ data }) => {
         
         // Options pour les séries
         const sOptions = [
-            { value: 'Warmup', label: 'Warm-up (Laps 1-3)', laps: [1, 2, 3] },
-            { value: 'S1', label: 'Serie 1 (Laps 4-18)', laps: Array.from({ length: 15 }, (_, i) => i + 4) },
-            { value: 'S2', label: 'Serie 2 (Laps 20-34)', laps: Array.from({ length: 15 }, (_, i) => i + 20) },
-            { value: 'Cooldown', label: 'Cool-down (Lap 35)', laps: [35] },
+            { value: 'Warmup', label: 'Warm-up', laps: [1, 2, 3] },
+            { value: 'S1', label: 'Serie 1', laps: Array.from({ length: 15 }, (_, i) => i + 4) },
+            { value: 'S2', label: 'Serie 2', laps: Array.from({ length: 15 }, (_, i) => i + 20) },
+            { value: 'Cooldown', label: 'Cool-down', laps: [35] },
             { value: 'ALL', label: 'Entire session', laps: laps },
         ];
         

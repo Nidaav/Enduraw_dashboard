@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useActivityData } from '../../hooks/useActivityData';
 import { useNavigate } from 'react-router-dom';
 import MultiMetricChart from '../Charts/MultiMetricChart';
+import StatsTableByRep from '../Stats/StatsTableByRep';
 
 
 const TrainingTips = ({ csvText }) => {
@@ -18,57 +19,6 @@ const TrainingTips = ({ csvText }) => {
     setTimeRange
   } = useActivityData(csvText);
 
-// Data simulating the aggregated performance metrics per repetition (200m effort laps)
-  const headers = [
-    { label: 'Lap', unit: '' },
-    { label: 'Duration', unit: '(s)' },
-    { label: 'Avg Speed', unit: '(km/h)' },
-    { label: 'Max HR', unit: '(bpm)' },
-    { label: 'Avg Cadence', unit: '(step/min)' },
-    { label: 'Avg VR', unit: '' },
-    { label: 'Avg STP', unit: '(%)' },
-  ];
-
-  const rawPerformanceDataPerLap = [
-    { lap: 1, series: 1, duration: 35.2, avgSpeed: 20.4, maxSpeed: 21.8, maxHR: 158, avgCadence: 192, avgVR: 7.95, avgSTP: 31.7 },
-    { lap: 2, series: 1, duration: 34.8, avgSpeed: 20.8, maxSpeed: 22.1, maxHR: 165, avgCadence: 193, avgVR: 7.89, avgSTP: 31.3 },
-    { lap: 3, series: 1, duration: 34.5, avgSpeed: 21.0, maxSpeed: 22.4, maxHR: 168, avgCadence: 194, avgVR: 7.85, avgSTP: 31.0 },
-    { lap: 4, series: 1, duration: 34.2, avgSpeed: 21.2, maxSpeed: 22.6, maxHR: 171, avgCadence: 195, avgVR: 7.82, avgSTP: 30.7 },
-    { lap: 5, series: 1, duration: 34.0, avgSpeed: 21.4, maxSpeed: 22.8, maxHR: 173, avgCadence: 195, avgVR: 7.80, avgSTP: 30.5 },
-    { lap: 6, series: 1, duration: 33.8, avgSpeed: 21.6, maxSpeed: 23.0, maxHR: 175, avgCadence: 196, avgVR: 7.78, avgSTP: 30.3 },
-    { lap: 7, series: 1, duration: 33.6, avgSpeed: 21.8, maxSpeed: 23.2, maxHR: 177, avgCadence: 196, avgVR: 7.75, avgSTP: 30.1 },
-    { lap: 8, series: 1, duration: 33.4, avgSpeed: 21.9, maxSpeed: 23.4, maxHR: 179, avgCadence: 197, avgVR: 7.72, avgSTP: 29.9 },
-    { lap: 9, series: 2, duration: 33.2, avgSpeed: 22.0, maxSpeed: 23.5, maxHR: 181, avgCadence: 197, avgVR: 7.70, avgSTP: 29.7 },
-    { lap: 10, series: 2, duration: 33.0, avgSpeed: 22.1, maxSpeed: 23.6, maxHR: 182, avgCadence: 198, avgVR: 7.68, avgSTP: 29.6 },
-    { lap: 11, series: 2, duration: 32.8, avgSpeed: 22.2, maxSpeed: 23.7, maxHR: 184, avgCadence: 198, avgVR: 7.66, avgSTP: 29.5 },
-    { lap: 12, series: 2, duration: 32.7, avgSpeed: 22.3, maxSpeed: 23.8, maxHR: 185, avgCadence: 199, avgVR: 7.64, avgSTP: 29.4 },
-    { lap: 13, series: 2, duration: 32.6, avgSpeed: 22.4, maxSpeed: 23.9, maxHR: 186, avgCadence: 199, avgVR: 7.62, avgSTP: 29.3 },
-    { lap: 14, series: 2, duration: 32.5, avgSpeed: 22.5, maxSpeed: 24.0, maxHR: 187, avgCadence: 200, avgVR: 7.60, avgSTP: 29.2 },
-    { lap: 15, series: 2, duration: 32.4, avgSpeed: 22.6, maxSpeed: 24.1, maxHR: 188, avgCadence: 200, avgVR: 7.58, avgSTP: 29.1 },
-    { lap: 16, series: 2, duration: 32.3, avgSpeed: 22.7, maxSpeed: 24.2, maxHR: 189, avgCadence: 201, avgVR: 7.56, avgSTP: 29.0 },
-  ];
-
-  const getSeriesSummary = (data, series) => {
-      const seriesData = data.filter(d => d.series === series);
-      if (seriesData.length === 0) return { avgDuration: 0, avgHR: 0, avgVR: 0, avgSTP: 0 };
-      return {
-          avgDuration: (seriesData.reduce((acc, curr) => acc + curr.duration, 0) / seriesData.length).toFixed(1),
-          avgHR: (seriesData.reduce((acc, curr) => acc + curr.maxHR, 0) / seriesData.length).toFixed(0),
-          avgVR: (seriesData.reduce((acc, curr) => acc + curr.avgVR, 0) / seriesData.length).toFixed(2),
-          avgSTP: (seriesData.reduce((acc, curr) => acc + curr.avgSTP, 0) / seriesData.length).toFixed(2),
-      };
-  };
-
-  const S1 = useMemo(() => getSeriesSummary(rawPerformanceDataPerLap, 1), []);
-  const S2 = useMemo(() => getSeriesSummary(rawPerformanceDataPerLap, 2), []);
-  
-  const seriesComparison = [
-    { metric: 'Avg Duration (200m)', s1: S1.avgDuration, s2: S2.avgDuration, unit: 's', trend: S2.avgDuration < S1.avgDuration ? 'Improved' : 'Stable' },
-    { metric: 'Avg Max HR', s1: S1.avgHR, s2: S2.avgHR, unit: 'bpm', trend: S2.avgHR > S1.avgHR ? 'Increased' : 'Stable' },
-    { metric: 'Avg Vertical Ratio', s1: S1.avgVR, s2: S2.avgVR, unit: '', trend: S2.avgVR < S1.avgVR ? 'Improved' : 'Stable' },
-    { metric: 'Avg Stance Time %', s1: S1.avgSTP, s2: S2.avgSTP, unit: '%', trend: S2.avgSTP < S1.avgSTP ? 'Improved' : 'Stable' },
-  ];
-
 
   if (!activityData) {
     return <div className="loading">Loading data...</div>;
@@ -83,64 +33,17 @@ const TrainingTips = ({ csvText }) => {
         <MultiMetricChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
       </div>
 
-      <p>By segmenting the session data, we will perform an in-depth analysis of the various metrics collected.</p>
+      {/* <p>By segmenting the session data, we will perform an in-depth analysis of the various metrics collected.</p> */}
 
       <h2>Performance Analysis by Repetition (200m)</h2>
+
       <p>The table below summarizes key performance metrics for the first, second, and final repetitions in the two series (S1 and S2). Metrics like **Vertical Ratio (VR)** and **Stance Time Percent (STP)** are crucial for assessing running economy.</p>
+      <StatsTableByRep data={filteredData}/>
     {/* TEST DU TABLEAU JOLIIIIIIIIIIIIIIIIIIIIII */}
       <div>
         <div>
           {/* --- Performance Table --- */}
-          <div>
-            <table>
-              <thead>
-                <tr>
-                  {headers.map((h, index) => (
-                    <th key={index} scope="col">
-                      {h.label} <span>{h.unit}</span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rawPerformanceDataPerLap.map((data, index) => (
-                  <tr key={data.lap}>
-                    <td>
-                      <span>{data.lap}</span>
-                    </td>
-                    <td>{data.duration}</td>
-                    <td>{data.avgSpeed}</td>
-                    <td>{data.maxHR}</td>
-                    <td>{data.avgCadence}</td>
-                    <td>{data.avgVR}</td>
-                    <td>{data.avgSTP}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
 
-          <div>
-            <div>
-              {seriesComparison.map((item) => (
-                <div key={item.metric}>
-                  <p>{item.metric}</p>
-                  <div>
-                    <div>
-                      <span>S1 Avg: </span>
-                      <span>{item.s1} {item.unit}</span>
-                    </div>
-                    <div>
-                      <span>S2 Avg: </span>
-                      <span>{item.s2} {item.unit}</span>
-                    </div>
-                  </div>
-                  <p>{item.trend} in Series 2.</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          
           {/* --- Key Findings --- */}
           <div className="mt-10 bg-white shadow-xl rounded-xl p-6 border-t-4 border-blue-500">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">Key Findings Summary</h2>
