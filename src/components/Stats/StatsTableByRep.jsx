@@ -105,7 +105,7 @@ const StatsTableByRep = ({ filteredData }) => {
                   fontWeight: 'bold', 
                   color: '#8884d8'
                   }}>
-                  Série {data.series}
+                  Serie {data.series}
                 </td>
               </tr>
             );
@@ -148,15 +148,15 @@ const StatsTableByRep = ({ filteredData }) => {
         justifyContent: 'space-between',
         }}>
         {seriesComparison.map((item) => (
-          <div key={item.metric}>
+          <div key={item.metric} style={{fontWeight: 'bold'}}>
             <p>{item.metric}</p>
             <div>
               <div>
-                <span>S1 Avg: </span>
+                <span style={{color: '#8884d8'}}>S1 Avg: </span>
                 <span>{item.s1} {item.unit}</span>
               </div>
               <div>
-                <span>S2 Avg: </span>
+                <span style={{color: '#8884d8'}}>S2 Avg: </span>
                 <span>{item.s2} {item.unit}</span>
               </div>
             </div>
