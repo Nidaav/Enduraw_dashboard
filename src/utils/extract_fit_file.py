@@ -55,8 +55,7 @@ def determine_lap_nature(lap_num):
     else:
         return 'Unknown'
     
-def parse_fit(path):
-    ff = FitFile(path)
+def parse_fit(ff):
     
     # 1. Extraction des enregistrements de la session (Record Messages)
     rows = []
@@ -241,23 +240,83 @@ def add_lap_info(fitfile, df):
     
     return df
 
+def export_lap_csv(fitfile, output_path):
+    """
+    Extrait toutes les données des messages 'lap', ajoute les colonnes de lisibilité
+    et les exporte dans le fichier activity_data_by_lap.csv.
+    """
+    laps = []
+
+    columns_to_drop = [
+        "avg_cadence_position", "avg_combined_pedal_smoothness", "avg_fractional_cadence", "avg_left_pco", "avg_left_pedal_smoothness", "enhanced_avg_speed", "enhanced_max_speed", "total_ascent", 
+        "avg_left_power_phase", "avg_left_power_phase_peak", "avg_left_torque_effectiveness", "avg_power", "avg_power_position", "avg_right_pco", "avg_right_pedal_smoothness", "avg_right_power_phase", "avg_right_power_phase_peak", "avg_right_torque_effectiveness", "avg_stroke_distance", "end_position_lat", "end_position_long", "event_group", "event", "event_type", "first_length_index", "intensity", "lap_trigger", "left_right_balance", "max_cadence_position", "max_fractional_cadence", "max_power", "max_power_position", "max_running_cadence", "max_temperature", "message_index", "normalized_power", "num_active_lengths", "num_lengths", "sport", "stand_count", "start_position_lat", "start_position_long", "sub_sport", "swim_stroke", "time_standing", "total_calories", "total_descent", "total_fat_calories", "total_fractional_cycles", "total_work", "wkt_step_index", "unknown_124", "unknown_125", "unknown_126", "unknown_27", "unknown_28", "unknown_29", "unknown_30", "unknown_70", "unknown_72", "unknown_73", "unknown_90", "unknown_96", "unknown_97"
+    ]
+    # Parcourir les messages 'lap'
+    for lap_num, lap in enumerate(fitfile.get_messages('lap'), 1):
+        lap_data = {"lap_number": lap_num}
+        for field in lap:
+            lap_data[field.name] = field.value
+        laps.append(lap_data)
+
+    if not laps:
+        print("Avertissement: Aucun lap trouvé pour l'exportation par lap.")
+        return
+
+    df_laps = pd.DataFrame(laps)
+    
+    # # Ajouter la nature du lap basée sur la logique utilisateur
+    # if 'lap_number' in df_laps.columns:
+    #     df_laps['lap_nature'] = df_laps['lap_number'].apply(determine_lap_nature)
+    
+    # Conversion des vitesses en km/h
+    for speed_col in ['max_speed', 'avg_speed']:
+        if speed_col in df_laps.columns:
+            # Assurer la conversion numérique avant le calcul
+            df_laps[speed_col] = pd.to_numeric(df_laps[speed_col], errors='coerce') 
+            df_laps[f'{speed_col}_kmh'] = np.round(df_laps[speed_col] * MS_TO_KMH, 2)
+
+    
+    # Conversion du cycle de la cadence en ppm
+    if 'avg_running_cadence' in df_laps.columns:
+        df_laps['avg_running_cadence'] = df_laps['avg_running_cadence'] * 2
+        # df_laps = df_laps.sort_values('start_time').reset_index(drop=True)
+
+    # 8. Suppression des colonnes indésirables
+    df_laps = df_laps.drop(columns=columns_to_drop, errors='ignore')
+
+    # Export CSV
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    df_laps.to_csv(output_path, index=False)
+    return df_laps
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python extract_fit.py path/to/file.fit")
         sys.exit(1)
     
     fn = Path(sys.argv[1])
-    output_path_csv = Path(__file__).parent.parent.parent / "public" / "activity_data.csv"
+    # Déterminer les chemins de sortie
+    public_dir = Path(__file__).parent.parent.parent / "public"
+    output_path_records_csv = public_dir / "activity_data.csv"
+    output_path_laps_csv = public_dir / "activity_data_by_lap.csv"
+
     try:
-        # Lancement de l'extraction et des traitements
-        df = parse_fit(str(fn))
+        # Initialisation du FitFile une seule fois
+        ff = FitFile(str(fn))
+        # 1. Traitement et export du fichier de RECORDS 
+        df = parse_fit(ff)
 
         # S'assurer que le répertoire de destination existe
-        output_path_csv.parent.mkdir(parents=True, exist_ok=True)
+        public_dir.mkdir(parents=True, exist_ok=True)
         
-        # Export CSV final
-        df.to_csv(output_path_csv, index=False)
-        print("Export terminé : activity_data.csv")
+        # Export CSV des records
+        df.to_csv(output_path_records_csv, index=False)
+        print("Export terminé : activity_data")
+        
+        # 2. Traitement et export du fichier de LAPS
+        export_lap_csv(ff, output_path_laps_csv)
+        print("Export terminé : activity_data_by_lap")
+
         
     except FileNotFoundError:
         print(f"Erreur: Fichier non trouvé à l'emplacement '{fn}'")
