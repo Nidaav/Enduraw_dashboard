@@ -10,21 +10,26 @@ import './App.css';
 
 function App() {
   const [csvText, setCsvText] = useState('');
+  const [csvByLapText, setCsvByLapText] = useState('');
 
   useEffect(() => {
+    // Chargement du fichier principal
     fetch('/activity_data.csv')
       .then(response => {
-        if (!response.ok) {
-          throw new Error(`Erreur HTTP : ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Erreur HTTP : ${response.status}`);
         return response.text();
       })
-      .then(text => {
-        setCsvText(text);
+      .then(setCsvText)
+      .catch(error => console.error("Erreur lors du chargement de activity_data.csv :", error));
+
+    // Chargement du fichier par lap
+    fetch('/activity_data_by_lap.csv')
+      .then(response => {
+        if (!response.ok) throw new Error(`Erreur HTTP : ${response.status}`);
+        return response.text();
       })
-      .catch(error => {
-        console.error("Erreur lors du chargement du fichier CSV :", error);
-      });
+      .then(setCsvByLapText)
+      .catch(error => console.error("Erreur lors du chargement de activity_data_by_lap.csv :", error));
   }, []);
 
   return (
@@ -41,10 +46,14 @@ function App() {
         </nav>
 
         <ScrollToTop />
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/stats" element={<Dashboard csvText={csvText} />} />
-          <Route path="/analysis" element={<Analysis csvText={csvText} />} />
+          <Route 
+            path="/analysis" 
+            element={<Analysis csvText={csvText} csvByLapText={csvByLapText} />} 
+          />
           <Route path="/tips" element={<TrainingTips />} />
           <Route path="/planning" element={<Planning />} />
         </Routes>

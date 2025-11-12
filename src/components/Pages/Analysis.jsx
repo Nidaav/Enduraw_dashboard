@@ -2,10 +2,11 @@ import React, { useMemo } from 'react';
 import { useActivityData } from '../../hooks/useActivityData';
 import { useNavigate } from 'react-router-dom';
 import MultiMetricChart from '../Charts/MultiMetricChart';
+import MultiMetricChartByLap from '../Charts/MultiMetricChartByLap';
 import StatsTableByRep from '../Stats/StatsTableByRep';
 
 
-const TrainingTips = ({ csvText }) => {
+const TrainingTips = ({ csvText, csvByLapText }) => {
   const navigate = useNavigate();
   
   const handleViewPlan = () => {
@@ -27,19 +28,23 @@ const TrainingTips = ({ csvText }) => {
   return (
     <div className="page-container">
       <h1>Data Analysis</h1>
-      <h2>The session studied is as follows: 2 × [8 × (200m around the VO2 max pace – 100m jog recovery)]</h2>
+      <h2>The session studied is as follows: 2 × [8 × (200m at high intensity pace – 100m jog recovery)]</h2>
 
       <div className="chart-container">
         <MultiMetricChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
       </div>
 
-      {/* <p>By segmenting the session data, we will perform an in-depth analysis of the various metrics collected.</p> */}
+      <p>By segmenting the data from this session by lap, we will conduct an in-depth analysis of the various metrics collected.</p>
 
-      <h2>Performance Analysis by Repetition (200m)</h2>
+      <h2>Performance analysis by laps</h2>
 
-      <p>The table below summarizes key performance metrics for the first, second, and final repetitions in the two series (S1 and S2). Metrics like **Vertical Ratio (VR)** and **Stance Time Percent (STP)** are crucial for assessing running economy.</p>
-      <StatsTableByRep data={filteredData}/>
-    {/* TEST DU TABLEAU JOLIIIIIIIIIIIIIIIIIIIIII */}
+      <div className="chart-container">
+        <MultiMetricChartByLap csvByLapText={csvByLapText} timeRange={timeRange} onBrushChange={setTimeRange} />
+      </div>
+      <p>The table below summarizes the key performance indicators for the intensity laps performed during the session and are classified into series (Serie 1 and Serie 2).</p>
+
+      <StatsTableByRep csvByLapText={csvByLapText}/>
+
       <div>
         <div>
           {/* --- Performance Table --- */}
