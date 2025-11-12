@@ -286,7 +286,6 @@ const MultiMetricChart = ({ data }) => {
 
     return (
         <div className="chart">
-            <h3 style={{ color: '#FAFAFA' }}>Multi-Metric Analysis</h3>
             <Controls />
             <ResponsiveContainer width="100%" height={400}>
                 <AreaChart 
