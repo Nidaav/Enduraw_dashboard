@@ -2,11 +2,12 @@ import React, { useMemo } from 'react';
 import { useActivityData } from '../../hooks/useActivityData';
 import { useNavigate } from 'react-router-dom';
 import MultiMetricChart from '../Charts/MultiMetricChart';
+import RecoveryQuality from '../Charts/RecoveryQuality';
 import MultiMetricChartByLap from '../Charts/MultiMetricChartByLap';
 import StatsTableByRep from '../Stats/StatsTableByRep';
 
 
-const TrainingTips = ({ csvText, csvByLapText }) => {
+const Analysis = ({ csvText, csvByLapText }) => {
   const navigate = useNavigate();
   
   const handleViewPlan = () => {
@@ -84,8 +85,12 @@ const TrainingTips = ({ csvText, csvByLapText }) => {
       <p><strong>Conclusion on Pacing:</strong> The **Progressive Build (P-B)** strategy is the more effective approach. It allows the athlete to achieve a **slightly higher average speed** (21.8 km/h vs 21.5 km/h) while incurring **lower cardiac stress** (16.0 bpm vs 18.5 bpm amplitude). For precision training, the P-B strategy demonstrates better management of effort and heart rate economy.</p>
 
       <h2>Recovery Quality Analysis (100m)</h2>
+      
       <p>Recovery Quality (QDR) is measured by the Heart Rate drop rate during the 100m recovery period. We also look for an overall cardiac drift by comparing the average heart rate at the end of the recovery phase between the two series.</p>
       <h3>TABLEAU A CREER A PARTIR DE Analyse de la Qualité de la Récupération (100m)</h3>
+      <div className="chart-container">
+        <RecoveryQuality activityDataRaw={filteredData} activityDataByLap={csvByLapText} />
+      </div>
       <p><strong>Recovery Analysis:</strong> Recovery quality **degrades in Series 2** (drop decreases from 26.5 to 22.0 bpm). The **marked cardiac drift** is significant: the average heart rate at the end of recovery increases by **14 bpm** from S1 to S2. This signals a **progressive overload** of the cardiovascular system and a loss of efficiency in recovery, demonstrating the mounting physiological fatigue and good tolerance for lactic threshold work.</p>
 
       <h2>Global Drifts Analysis (Series 1 vs. Series 2 Comparison)</h2>
@@ -116,4 +121,4 @@ const TrainingTips = ({ csvText, csvByLapText }) => {
   );
 };
 
-export default TrainingTips;
+export default Analysis;
