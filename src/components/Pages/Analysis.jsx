@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { useActivityData } from '../../hooks/useActivityData';
 import { useNavigate } from 'react-router-dom';
 import MultiMetricChart from '../Charts/MultiMetricChart';
-import RecoveryQuality from '../Charts/RecoveryQuality';
+import RecoveryQuality from '../Stats/RecoveryQuality';
+import PacingStrategy from '../Stats/PacingStrategy';
 import MultiMetricChartByLap from '../Charts/MultiMetricChartByLap';
 import StatsTableByRep from '../Stats/StatsTableByRep';
 
@@ -79,15 +80,14 @@ const Analysis = ({ csvText, csvByLapText }) => {
       <p><strong>Initial Observations:</strong> Average speed improves from 20.57 to 22.15 km/h. Crucially, as intensity increases (evidenced by the rise in Max HR), the cadence increases (192 to 198 steps/min) and the Vertical Ratio (VR) decreases (7.95 to 7.60). This suggests an improvement in running efficiency and economy as the athlete finds their high-intensity stride.</p>
 
       <h2>Impact of Pacing Strategy on Heart Rate Response</h2>
-      <p>We classified repetitions into two primary pacing strategies based on within-lap speed variance: **Fast Start/Relax (F-R)** and **Progressive Build (P-B)**. We then compared the induced cardiac stress (Heart Rate Amplitude).</p>
-      
-      <h3>TABLEAU A CREER A PARTIR DE Étude de l'Impact de la Stratégie d'Allure</h3>
+      <p>We classified repetitions into two primary pacing strategies based on within-lap speed variance:</p>
+      <p>Fast Start/Relax (F-R) and Progressive Build (P-B). We then compared the induced cardiac stress (Heart Rate Amplitude).</p>
+      <PacingStrategy activityDataRaw={filteredData} activityDataByLap={csvByLapText} />
       <p><strong>Conclusion on Pacing:</strong> The **Progressive Build (P-B)** strategy is the more effective approach. It allows the athlete to achieve a **slightly higher average speed** (21.8 km/h vs 21.5 km/h) while incurring **lower cardiac stress** (16.0 bpm vs 18.5 bpm amplitude). For precision training, the P-B strategy demonstrates better management of effort and heart rate economy.</p>
 
       <h2>Recovery Quality Analysis (100m)</h2>
       
       <p>Recovery Quality (QDR) is measured by the Heart Rate drop rate during the 100m recovery period. We also look for an overall cardiac drift by comparing the average heart rate at the end of the recovery phase between the two series.</p>
-      <h3>TABLEAU A CREER A PARTIR DE Analyse de la Qualité de la Récupération (100m)</h3>
       <div className="chart-container">
         <RecoveryQuality activityDataRaw={filteredData} activityDataByLap={csvByLapText} />
       </div>
