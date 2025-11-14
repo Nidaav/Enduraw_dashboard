@@ -163,7 +163,7 @@ const StatsTableByRep = ({ csvByLapText }) => {
                             const seriesHeaderRow = (isStartOfSeries1 || isStartOfSeries2) && (
                                 <tr key={`series-header-${data.series}`} style={{ 
                                     backgroundColor: '#8884d840',
-                                    borderTop: isStartOfSeries2 ? '4px solid #8884d8' : 'none',
+                                    borderTop: '4px solid #8884d8',
                                     borderBottom: '1px solid #8884d8'
                                     }}>
                                     <td colSpan={headers.length} style={{ 
