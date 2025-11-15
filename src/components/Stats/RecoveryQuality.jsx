@@ -47,13 +47,6 @@ const calculateRecoveryMetrics = ({ activityDataRaw, activityDataByLap }) => {
   const results = recoveryLaps.map((currentLap) => {
     recovery_lap_count += 1; // Incrémentation du numéro de récupération
     const lapNumber = safeNum(currentLap.lap_number);
-
-    // trouver le dernier lap d'intensité avec lap_number < lapNumber (le plus proche)
-    const prevIntensity = [...intensityLaps]
-      .filter(l => safeNum(l.lap_number) < lapNumber)
-      .sort((a, b) => safeNum(b.lap_number) - safeNum(a.lap_number))[0] || null;
-
-    // Durée : prefer lap_duration, sinon tenter différence entre timestamp et start_time
     let DURATION = safeNum(currentLap.lap_duration);
     const startTs = parseTimestamp(currentLap.start_time);
     const endTs = parseTimestamp(currentLap.timestamp);
@@ -176,12 +169,6 @@ const RecoveryQuality = ({ activityDataRaw, activityDataByLap, showDebug = false
     });
   }, [normalizedRaw, normalizedByLap]);
 
-  if (showDebug) {
-    console.debug('normalizedRaw', normalizedRaw.slice(0,3));
-    console.debug('normalizedByLap', normalizedByLap.slice(0,6));
-    console.debug('analysisData', analysisData);
-  }
-
   if (!analysisData.length) {
     return (
       <div className="p-6 rounded-xl bg-gray-900 text-white border border-gray-700">
@@ -252,21 +239,36 @@ const RecoveryQuality = ({ activityDataRaw, activityDataByLap, showDebug = false
   return (
     <div className="p-6 bg-gray-900 rounded-2xl border border-gray-700 text-white space-y-8">
       
-      {/* Chart */}
-      <div className="w-full h-96 bg-gray-800 p-4 rounded-xl border border-gray-700">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={analysisData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
-            <XAxis dataKey="recovery_lap_number" tick={{ fill: '#ddd' }} label={{ value: 'Lap Recovery', position: 'bottom', fill: '#aaa' }} />
-            <YAxis tick={{ fill: '#ddd' }} label={{ value: 'bpm', angle: -90, position: 'insideLeft', fill: '#aaa' }} />
-            <Tooltip contentStyle={{ backgroundColor: '#111827', borderRadius: 8 }} />
-            <Legend wrapperStyle={{ color: '#ddd' }} />
-            <Line type="monotone" dataKey="HR_START" stroke="#f5a623" strokeWidth={2} dot={{ r: 3 }} name="HR Start (Max Rec Lap)" />
-            <Line type="monotone" dataKey="HR_END" stroke="#50e3c2" strokeWidth={2} dot={{ r: 3 }} name="HR End (Min Rec Lap)" />
-            <Line type="monotone" dataKey="FC_DROP" stroke="#8884d8" strokeWidth={2} strokeDasharray="5 5" name="HR Drop" dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Chart Centré et Redimensionné */}
+    <div style={{width: '87vw', height: '35vh'}} className="flex justify-center items-center">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={analysisData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+          <XAxis dataKey="recovery_lap_number" tick={{ fill: '#ddd' }} label={{ value: 'Lap Recovery', position: 'right', offset: -110, dy: 14, fill: '#aaa' }} />
+          <YAxis 
+            yAxisId="hr_axis" 
+            orientation="left"
+            stroke="#f5a623" 
+            tick={{ fill: '#f5a623' }} 
+            domain={['auto', 'auto']} 
+            label={{ value: 'HR (bpm)', angle: -90, position: 'insideLeft', fill: '#f5a623' }}
+          />
+          <YAxis 
+            yAxisId="drop_axis" 
+            orientation="right"
+            stroke="#8884d8"
+            tick={{ fill: '#8884d8' }} 
+            domain={['auto', 'auto']}
+            label={{ value: 'HR Drop', angle: 90, position: 'insideRight', fill: '#8884d8' }}
+          />
+          <Tooltip contentStyle={{ backgroundColor: '#111827', borderRadius: 8 }} />
+          <Legend wrapperStyle={{ color: '#ddd' }} />
+          <Line yAxisId="hr_axis" type="monotone" dataKey="HR_START" stroke="#f5a623" strokeWidth={2} dot={{ r: 3 }} name="HR Start (Max Recovery Lap)" />
+          <Line yAxisId="hr_axis" type="monotone" dataKey="HR_END" stroke="#50e3c2" strokeWidth={2} dot={{ r: 3 }} name="HR End (Min Recovery Lap)" />
+          <Line yAxisId="drop_axis" type="monotone" dataKey="FC_DROP" stroke="#8884d8" strokeWidth={2} strokeDasharray="5 5" name="HR Drop" dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
 
       {/* Table + Summary grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

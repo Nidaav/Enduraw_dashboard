@@ -6,7 +6,7 @@ from fitparse import FitFile
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import numpy as np
-
+# La commande a lancer : python src/utils/extract_fit_file.py "./src/utils/20355680594_ACTIVITY.fit"
 # Facteur de conversion de la vitesse: 1 m/s = 3.6 km/h
 MS_TO_KMH = 3.6
 
@@ -80,7 +80,7 @@ def classify_lap_nature_by_speed(df_laps):
                                  (df_laps.index <= last_intensity_idx) & \
                                  (df_laps['lap_nature'] == 'Unknown')
                                  
-        df_laps.loc[mask_remaining_unknown, 'lap_nature'] = 'Intermediate_Workout'
+        df_laps.loc[mask_remaining_unknown, 'lap_nature'] = 'Recovery'
 
         df_laps = df_laps.drop(columns=['prev_lap_nature'], errors='ignore')
 
