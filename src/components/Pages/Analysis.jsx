@@ -47,37 +47,7 @@ const Analysis = ({ csvText, csvByLapText }) => {
 
       <StatsTableByRep csvByLapText={csvByLapText}/>
 
-      <div>
-        <div>
-          {/* --- Performance Table --- */}
 
-          {/* --- Key Findings  --- */}
-          {/* TODO */}
-          <div className="mt-10 bg-white shadow-xl rounded-xl p-6 border-t-4 border-blue-500">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Key Findings Summary</h2>
-              <ul className="space-y-4 text-gray-700">
-                  <li className="flex items-start">
-                      <span className="text-blue-500 text-xl mr-2">🏃</span>
-                      <div>
-                          <strong className="font-semibold">Performance Improvement Under Fatigue:</strong> The athlete significantly <span className="font-bold text-green-600">improved 200m time (-0.5 s drift)</span> and **Running Economy** (VR and STP decreased) in Series 2, indicating high neuromuscular fatigue resistance.
-                      </div>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="text-blue-500 text-xl mr-2">❤️</span>
-                      <div>
-                          <strong className="font-semibold">Cardiovascular Cost & Drift:</strong> This speed improvement came at the cost of a marked HR drift, with Max HR increasing by **+11 bpm** and recovery HR rising from **140 bpm** to **154 bpm**. This highlights the **cardiac limitation** under high repetition density.
-                      </div>
-                  </li>
-                  <li className="flex items-start">
-                      <span className="text-blue-500 text-xl mr-2">🚀</span>
-                      <div>
-                          <strong className="font-semibold">Optimal Pacing Strategy:</strong> The **Progressive Start** strategy (M-P) was found to be more efficient, achieving slightly higher final speeds with a **lower cardiac stress** (smaller FC amplitude) compared to the Rapid Start/Deceleration approach.
-                      </div>
-                  </li>
-              </ul>
-          </div>
-        </div>
-      </div>
       <p><strong>Initial Observations:</strong> Average speed improves from 20.57 to 22.15 km/h. Crucially, as intensity increases (evidenced by the rise in Max HR), the cadence increases (192 to 198 steps/min) and the Vertical Ratio (VR) decreases (7.95 to 7.60). This suggests an improvement in running efficiency and economy as the athlete finds their high-intensity stride.</p>
       
       {/* PACING STRATEGY */}
@@ -85,7 +55,7 @@ const Analysis = ({ csvText, csvByLapText }) => {
       <h2>Impact of Pacing Strategy on Heart Rate Response</h2>
       <p>We classified repetitions into two primary pacing strategies based on within-lap speed variance:</p>
       <p>Fast Start/Relax (F-R) and Progressive Build (P-B). We then compared the induced cardiac stress (Heart Rate Amplitude).</p>
-      <PacingStrategy activityDataRaw={filteredData} activityDataByLap={csvByLapText} />
+      <PacingStrategy activityDataRaw={filteredData} />
       <p><strong>Conclusion on Pacing:</strong> The **Progressive Build (P-B)** strategy is the more effective approach. It allows the athlete to achieve a **slightly higher average speed** (21.8 km/h vs 21.5 km/h) while incurring **lower cardiac stress** (16.0 bpm vs 18.5 bpm amplitude). For precision training, the P-B strategy demonstrates better management of effort and heart rate economy.</p>
       
       {/* RECOVERY QUALITY */}
@@ -112,6 +82,32 @@ const Analysis = ({ csvText, csvByLapText }) => {
       <h3>Correlation between Impact of Fatigue on Heart: Recovery HR Drift vs. Next Rep</h3>
       <p><strong>Correlation:</strong> +0.65 (Moderate to strong positive correlation)</p>
       <p><strong>Interpretation:</strong> The less the heart recovers (the higher the HR_END_OF_RECOVERY), the higher the HR_MAX reached in the subsequent repetition. **Recovery quality is the limiting factor** for effort repeatability. The coach should consider slightly longer recovery times if the goal is to keep the heart rate below a certain threshold (e.g., 140 bpm) before starting the next rep.</p>
+
+      {/* --- Key Findings  --- */}
+      {/* TODO */}
+      <div className="mt-10 bg-white shadow-xl rounded-xl p-6 border-t-4 border-blue-500">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Key Findings Summary</h2>
+        <ul className="space-y-4 text-gray-700">
+          <li className="flex items-start">
+            <span className="text-blue-500 text-xl mr-2">🏃</span>
+            <div>
+              <strong className="font-semibold">Performance Improvement Under Fatigue:</strong> The athlete significantly <span className="font-bold text-green-600">improved 200m time (-0.5 s drift)</span> and **Running Economy** (VR and STP decreased) in Series 2, indicating high neuromuscular fatigue resistance.
+            </div>
+          </li>
+          <li className="flex items-start">
+            <span className="text-blue-500 text-xl mr-2">❤️</span>
+            <div>
+              <strong className="font-semibold">Cardiovascular Cost & Drift:</strong> This speed improvement came at the cost of a marked HR drift, with Max HR increasing by **+11 bpm** and recovery HR rising from **140 bpm** to **154 bpm**. This highlights the **cardiac limitation** under high repetition density.
+            </div>
+          </li>
+          <li className="flex items-start">
+            <span className="text-blue-500 text-xl mr-2">🚀</span>
+            <div>
+              <strong className="font-semibold">Optimal Pacing Strategy:</strong> The **Progressive Start** strategy (M-P) was found to be more efficient, achieving slightly higher final speeds with a **lower cardiac stress** (smaller FC amplitude) compared to the Rapid Start/Deceleration approach.
+            </div>
+          </li>
+        </ul>
+      </div>
 
       <h2>Recommendations </h2>
       {/* TODO */}
