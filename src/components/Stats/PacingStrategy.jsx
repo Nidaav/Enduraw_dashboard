@@ -5,7 +5,7 @@ import Papa from 'papaparse';
  * Props:
  *  - activityDataRaw: Array d'objets (filteredData). Chaque point attendu : { lap_number, speed_kmh, heart_rate, timestamp?, lap_nature? }
  *  - activityDataByLap: optional - CSV string (raw) or Array parsed providing per-lap rows with lap_number and lap_nature.
- *  - thresholdPercent: optional - seuil (%) pour classer FR vs PB (default 3)
+ *  - thresholdPercent: optional - seuil (%) pour classer Steady vs Unsteady (DEFAULT 9.15)
  */
 
 const safeNum = (v) => {
@@ -13,29 +13,17 @@ const safeNum = (v) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-const computeLapStats = (points) => {
-  const speeds = points.map(p => safeNum(p.speed_kmh)).filter(v => v > 0);
-  const hrs = points.map(p => safeNum(p.heart_rate)).filter(v => v > 0);
+// Fonction pour extraire l'Amplitude HR (inchangée)
+const computeHrAmplitude = (points) => {
+    const hrs = points.map(p => safeNum(p.heart_rate)).filter(v => v > 0);
 
-  if (!speeds.length || !hrs.length) return null;
+    if (!hrs.length) return { maxHr: 0, minHr: 0, hrAmplitude: 0 };
 
-  const avgSpeed = speeds.reduce((a,b) => a + b, 0) / speeds.length;
-  const maxSpeed = Math.max(...speeds);
-  const minSpeed = Math.min(...speeds);
-
-  const maxHr = Math.max(...hrs);
-  const minHr = Math.min(...hrs);
-
-  const pacingDelta = avgSpeed > 0 ? ((maxSpeed - avgSpeed) / avgSpeed) * 100 : 0;
-  const hrAmplitude = maxHr - minHr;
-
-  return {
-    avgSpeed,
-    maxSpeed,
-    minSpeed,
-    pacingDelta,
-    hrAmplitude
-  };
+    const maxHr = Math.max(...hrs);
+    const minHr = Math.min(...hrs);
+    const hrAmplitude = maxHr - minHr;
+    
+    return { maxHr, minHr, hrAmplitude };
 };
 
 const parseByLap = (activityDataByLap) => {
@@ -50,121 +38,107 @@ const parseByLap = (activityDataByLap) => {
   return parsed.data;
 };
 
-const PacingStrategyTable = ({ activityDataRaw = [], activityDataByLap = null, thresholdPercent = 2 }) => {
+// ⭐ Mise à jour de la valeur par défaut pour le seuil (median 9.15)
+const DEFAULT_THRESHOLD = 9.15;
 
-  // 0) normalisation basique des points (éviter undefined)
-  const normalizedRaw = useMemo(() => {
-    if (!Array.isArray(activityDataRaw)) return [];
-    return activityDataRaw.map(p => ({
-      lap_number: safeNum(p.lap_number ?? p.lap ?? p.lapNumber),
-      speed_kmh: safeNum(p.speed_kmh ?? p.speedKmh ?? p.speed),
-      heart_rate: safeNum(p.heart_rate ?? p.hr ?? p.heartRate),
-      timestamp: p.timestamp ?? p.time ?? p.t,
-      lap_nature: p.lap_nature ?? p.lapNature ?? p.type ?? null
-    }));
-  }, [activityDataRaw]);
+const PacingStrategyTable = ({ activityDataRaw = [], activityDataByLap = null, thresholdPercent = DEFAULT_THRESHOLD }) => {
 
-  // 1) parse by-lap CSV / object si fourni
+  // 1) parse by-lap CSV pour les métriques et lap_nature
   const normalizedByLap = useMemo(() => {
     if (!activityDataByLap) return [];
     const parsed = parseByLap(activityDataByLap);
-    // map defensively
+    
     return parsed.map(r => ({
       lap_number: safeNum(r.lap_number ?? r.lap ?? r.lapNumber),
-      lap_nature: r.lap_nature ?? r.lapNature ?? r.lap_type ?? r.type ?? ''
+      lap_nature: r.lap_nature ?? r.lapNature ?? r.lap_type ?? r.type ?? '',
+      // Récupération des vitesses depuis activityDataByLap (le CSV)
+      avg_speed_kmh: safeNum(r.avg_speed_kmh),
+      max_speed_kmh: safeNum(r.max_speed_kmh),
     }));
   }, [activityDataByLap]);
 
-  // 2) déterminer la liste des lap_numbers 'Intensity'
-  const intensityLapNumbers = useMemo(() => {
-    if (normalizedByLap && normalizedByLap.length) {
-      return normalizedByLap
-        .filter(r => {
-          const n = (r.lap_nature ?? '').toString().toLowerCase();
-          return n === 'intensity' || n === 'intensité' || n.includes('intens');
-        })
-        .map(r => safeNum(r.lap_number))
-        .filter(n => n > 0)
-        .sort((a,b) => a - b);
-    }
-    // fallback : chercher dans activityDataRaw si les points contiennent lap_nature
-    const candidate = Array.from(new Set(
-      normalizedRaw
-        .filter(p => p.lap_nature && typeof p.lap_nature === 'string' && (
-          p.lap_nature.toLowerCase().includes('intensity') ||
-          p.lap_nature.toLowerCase().includes('intens')
-        ))
-        .map(p => safeNum(p.lap_number))
-        .filter(n => n > 0)
-    )).sort((a,b) => a - b);
-    return candidate;
-  }, [normalizedByLap, normalizedRaw]);
+  // 2) déterminer la liste des laps 'Intensity' et les données de vitesse associées
+  const intensityLapsData = useMemo(() => {
+    return normalizedByLap
+      .filter(r => {
+        const n = (r.lap_nature ?? '').toString().toLowerCase();
+        return n === 'intensity' || n === 'intensité' || n.includes('intens');
+      })
+      .filter(r => r.lap_number > 0) // Assure un lap_number valide
+      .sort((a,b) => a.lap_number - b.lap_number);
+  }, [normalizedByLap]);
 
-  // 3) grouper points par lap_number
+  // 3) grouper points par lap_number pour les autres métriques (comme HR)
   const pointsByLap = useMemo(() => {
     const map = new Map();
-    normalizedRaw.forEach(p => {
+    activityDataRaw.forEach(p => {
       const lap = safeNum(p.lap_number);
       if (!map.has(lap)) map.set(lap, []);
       map.get(lap).push(p);
     });
     return map;
-  }, [normalizedRaw]);
+  }, [activityDataRaw]);
 
   // 4) pour chaque lap d'intensity, calcul des stats et classification
   const perLapResults = useMemo(() => {
-    if (!intensityLapNumbers || intensityLapNumbers.length === 0) return [];
+    if (!intensityLapsData || intensityLapsData.length === 0) return [];
 
-    const res = intensityLapNumbers.map(lapNum => {
+    const res = intensityLapsData.map((lapData, index) => {
+      const lapNum = lapData.lap_number;
       const pts = pointsByLap.get(lapNum) || [];
-      const stats = computeLapStats(pts);
-      if (!stats) {
-        return {
-          lap: lapNum,
-          avgSpeed: 0,
-          maxSpeed: 0,
-          pacingDelta: 0,
-          hrAmplitude: 0,
-          classification: 'UNKNOWN',
-        };
-      }
-      const classification = (stats.pacingDelta >= thresholdPercent) ? 'F-R' : 'P-B';
+      
+      // Vitesse: Vient du CSV d'analyse par tour (source de vérité)
+      const avgSpeed = lapData.avg_speed_kmh;
+      const maxSpeed = lapData.max_speed_kmh;
+
+      // HR: Calculée à partir des points bruts (pour l'amplitude)
+      const hrStats = computeHrAmplitude(pts);
+
+      // Calcul du Pacing Delta (%) : (MaxSpeed - AvgSpeed) / AvgSpeed x 100
+      const pacingDelta = avgSpeed > 0 ? ((maxSpeed - avgSpeed) / avgSpeed) * 100 : 0;
+      const hrAmplitude = hrStats.hrAmplitude;
+      
+      // ⭐ Inversion de la logique de classification : 
+      // Unsteady Pace (Vitesse irrégulière) si Pacing Delta >= Seuil
+      // Steady Pace (Vitesse régulière) si Pacing Delta < Seuil
+      const classification = (pacingDelta >= thresholdPercent) ? 'UnsteadyPace' : 'SteadyPace';
+      
       return {
-        lap: lapNum,
-        avgSpeed: stats.avgSpeed,
-        maxSpeed: stats.maxSpeed,
-        pacingDelta: stats.pacingDelta,
-        hrAmplitude: stats.hrAmplitude,
+        lap: index + 1,
+        originalLap: lapNum,
+        avgSpeed,
+        maxSpeed,
+        pacingDelta,
+        hrAmplitude,
         classification
       };
     });
 
-    // sort par lap
-    return res.sort((a,b) => a.lap - b.lap);
-  }, [intensityLapNumbers, pointsByLap, thresholdPercent]);
+    return res;
+  }, [intensityLapsData, pointsByLap, thresholdPercent]);
 
-  // 5) regrouper FR vs PB et calculer moyennes pour résumé
+  // 5) regrouper Steady vs Unsteady et calculer moyennes pour résumé
   const summary = useMemo(() => {
-    const fr = perLapResults.filter(r => r.classification === 'F-R');
-    const pb = perLapResults.filter(r => r.classification === 'P-B');
+    const unsteady = perLapResults.filter(r => r.classification === 'UnsteadyPace');
+    const steady = perLapResults.filter(r => r.classification === 'SteadyPace');
 
     const mean = (arr, key) => arr.length ? arr.reduce((s, x) => s + (x[key] || 0), 0) / arr.length : 0;
 
     return {
-      FR: {
-        count: fr.length,
-        avgSpeed: mean(fr, 'avgSpeed'),
-        hrAmp: mean(fr, 'hrAmplitude')
+      Unsteady: {
+        count: unsteady.length,
+        avgSpeed: mean(unsteady, 'avgSpeed'),
+        hrAmp: mean(unsteady, 'hrAmplitude')
       },
-      PB: {
-        count: pb.length,
-        avgSpeed: mean(pb, 'avgSpeed'),
-        hrAmp: mean(pb, 'hrAmplitude')
+      Steady: {
+        count: steady.length,
+        avgSpeed: mean(steady, 'avgSpeed'),
+        hrAmp: mean(steady, 'hrAmplitude')
       }
     };
   }, [perLapResults]);
 
-  // 6) If no intensity laps found, affichage utile
+  // 6) If no intensity laps found, affichage utile (inchangé)
   if (!perLapResults.length) {
     return (
       <div style={{
@@ -202,13 +176,12 @@ const PacingStrategyTable = ({ activityDataRaw = [], activityDataByLap = null, t
         border: '1px solid #333',
         marginBottom: 16
       }}>
-        <h3 style={{ marginTop: 0 }}>Détail par Lap (Intensity)</h3>
 
         <div style={{ overflowX: 'auto' }}>
           <table style={{ borderCollapse: 'collapse', width: '100%' }}>
             <thead>
               <tr>
-                <th style={{ ...headerStyle, textAlign: 'left' }}>Lap</th>
+                <th style={{ ...headerStyle  }}>Répétition</th>
                 <th style={headerStyle}>Avg Speed (km/h)</th>
                 <th style={headerStyle}>Max Speed (km/h)</th>
                 <th style={headerStyle}>Pacing Δ (%)</th>
@@ -219,15 +192,15 @@ const PacingStrategyTable = ({ activityDataRaw = [], activityDataByLap = null, t
             <tbody>
               {perLapResults.map((r, i) => (
                 <tr key={r.lap} style={rowBg(i)}>
-                  <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600' }}>{r.lap}</td>
+                  <td style={{ ...cellStyle, fontWeight: '600' }}>{r.lap}</td>
                   <td style={cellStyle}>{Number(r.avgSpeed).toFixed(2)}</td>
                   <td style={cellStyle}>{Number(r.maxSpeed).toFixed(2)}</td>
-                  <td style={{ ...cellStyle, color: r.pacingDelta >= thresholdPercent ? '#82ca9d' : '#ffc658' }}>
+                  <td style={{ ...cellStyle, color: r.pacingDelta >= thresholdPercent ? '#ffc658' : '#82ca9d' }}>
                     {Number(r.pacingDelta).toFixed(2)}
                   </td>
                   <td style={cellStyle}>{Number(r.hrAmplitude).toFixed(1)}</td>
-                  <td style={{ ...cellStyle, fontWeight: '700', color: r.classification === 'F-R' ? '#82ca9d' : '#50e3c2' }}>
-                    {r.classification}
+                  <td style={{ ...cellStyle, fontWeight: '700', color: r.classification === 'UnsteadyPace' ? '#ffc658' : '#82ca9d' }}>
+                    {r.classification === 'UnsteadyPace' ? 'Unsteady' : 'Steady'}
                   </td>
                 </tr>
               ))}
@@ -236,22 +209,22 @@ const PacingStrategyTable = ({ activityDataRaw = [], activityDataByLap = null, t
         </div>
       </div>
 
-      {/* Résumé FR vs PB (tableau existant remanié dynamiquement) */}
+      {/* Résumé Steady vs Unsteady */}
       <div style={{
         backgroundColor: '#1E1E1E',
         padding: 12,
         borderRadius: 8,
         border: '1px solid #333'
       }}>
-        <h3 style={{ marginTop: 0 }}>Synthèse Pacing Strategy (FR vs PB)</h3>
+        <h3 style={{ marginTop: 0 }}>Synthèse Pacing Strategy (Steady vs Unsteady)</h3>
 
         <table style={{ borderCollapse: 'collapse', width: '100%', color: '#FAFAFA' }}>
           <thead>
             <tr>
               <th style={{ ...headerStyle, textAlign: 'left' }}>Metric</th>
-              <th style={headerStyle}>Fast Start/Relax (F-R) <div style={{ fontSize: 12, color: '#bbb' }}>{summary.FR.count} laps</div></th>
-              <th style={headerStyle}>Progressive Build (P-B) <div style={{ fontSize: 12, color: '#bbb' }}>{summary.PB.count} laps</div></th>
-              <th style={headerStyle}>Difference (P-B - F-R)</th>
+              <th style={headerStyle}>Unsteady Pace <div style={{ fontSize: 12, color: '#bbb' }}>{summary.Unsteady.count} laps</div></th>
+              <th style={headerStyle}>Steady Pace <div style={{ fontSize: 12, color: '#bbb' }}>{summary.Steady.count} laps</div></th>
+              <th style={headerStyle}>Difference (Steady - Unsteady)</th>
               <th style={headerStyle}>Conclusion</th>
             </tr>
           </thead>
@@ -259,8 +232,8 @@ const PacingStrategyTable = ({ activityDataRaw = [], activityDataByLap = null, t
             {[
               {
                 metric: 'Avg Speed (km/h)',
-                fr: summary.FR.avgSpeed,
-                pb: summary.PB.avgSpeed,
+                fr: summary.Unsteady.avgSpeed,
+                pb: summary.Steady.avgSpeed,
                 unit: 'km/h',
                 betterIsHigher: true,
                 color: '#82ca9d',
@@ -268,8 +241,8 @@ const PacingStrategyTable = ({ activityDataRaw = [], activityDataByLap = null, t
               },
               {
                 metric: 'HR Amplitude (bpm)',
-                fr: summary.FR.hrAmp,
-                pb: summary.PB.hrAmp,
+                fr: summary.Unsteady.hrAmp, 
+                pb: summary.Steady.hrAmp,
                 unit: 'bpm',
                 betterIsHigher: false,
                 color: '#ffc658',
@@ -283,6 +256,7 @@ const PacingStrategyTable = ({ activityDataRaw = [], activityDataByLap = null, t
                   <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '700' }}>{item.metric}</td>
                   <td style={cellStyle}>{(item.fr || 0).toFixed(item.unit === 'bpm' ? 1 : 2)} {item.unit}</td>
                   <td style={cellStyle}>{(item.pb || 0).toFixed(item.unit === 'bpm' ? 1 : 2)} {item.unit}</td>
+                  {/* La différence est toujours calculée Steady (pb) - Unsteady (fr) */}
                   <td style={{ ...cellStyle, color: diff >= 0 ? '#82ca9d' : '#ffc658', fontWeight: '700' }}>{diffText} {item.unit}</td>
                   <td style={{ ...cellStyle, color: item.color }}>{item.conclude(item.pb || 0, item.fr || 0)}</td>
                 </tr>

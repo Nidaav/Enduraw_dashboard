@@ -54,28 +54,25 @@ const StatsTableByRep = ({ csvByLapText }) => {
             // Création de la série (Série 1 : laps 1-8, Série 2 : laps 9-16, etc. / 8 laps par série)
             const series_num = Math.floor(index / 8) + 1; 
 
+            // Helper to get the correct CSV column name from the JS key
+            const getCsvColumn = (jsKey) => Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === jsKey);
+
             const data = {
                 lap: lap_num,
                 series: series_num,
-                // Appliquer les mappings et le formatage pour chaque colonne
-                duration: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'duration')] || 0).toFixed(3),
-                avgSpeed: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'avgSpeed')] || 0).toFixed(2),
-                maxSpeed: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'maxSpeed')] || 0).toFixed(2),
-                avgHR: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'avgHR')] || 0).toFixed(0),
-                maxHR: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'maxHR')] || 0).toFixed(0),
-                avgCadence: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'avgCadence')] || 0).toFixed(1),
-                avgStepLength: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'avgStepLength')] || 0).toFixed(0),
-                avgStanceTime: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'avgStanceTime')] || 0).toFixed(1),
-                avgSTP: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'avgSTP')] || 0).toFixed(2),
-                avgVR: parseFloat(row[Object.keys(COLUMN_MAPPING).find(key => COLUMN_MAPPING[key] === 'avgVR')] || 0).toFixed(2),
+                // Appliquer les mappings et le formatage. On convertit en nombre pour les agrégations.
+                // Attention: Les toFixed() ici servent à garantir la précision stockée AVANT agrégation.
+                duration: Number(parseFloat(row[getCsvColumn('duration')] || 0).toFixed(3)),
+                avgSpeed: Number(parseFloat(row[getCsvColumn('avgSpeed')] || 0).toFixed(2)),
+                maxSpeed: Number(parseFloat(row[getCsvColumn('maxSpeed')] || 0).toFixed(2)),
+                avgHR: Number(parseFloat(row[getCsvColumn('avgHR')] || 0).toFixed(0)),
+                maxHR: Number(parseFloat(row[getCsvColumn('maxHR')] || 0).toFixed(0)),
+                avgCadence: Number(parseFloat(row[getCsvColumn('avgCadence')] || 0).toFixed(1)),
+                avgStepLength: Number(parseFloat(row[getCsvColumn('avgStepLength')] || 0).toFixed(0)),
+                avgStanceTime: Number(parseFloat(row[getCsvColumn('avgStanceTime')] || 0).toFixed(1)),
+                avgSTP: Number(parseFloat(row[getCsvColumn('avgSTP')] || 0).toFixed(2)),
+                avgVR: Number(parseFloat(row[getCsvColumn('avgVR')] || 0).toFixed(2)),
             };
-
-            // Convertir en nombres les colonnes qui seront utilisées dans les calculs
-            Object.keys(data).forEach(key => {
-                if (key !== 'series') {
-                    data[key] = Number(data[key]);
-                }
-            });
 
             return data;
         });
@@ -84,13 +81,14 @@ const StatsTableByRep = ({ csvByLapText }) => {
     // 2. Fonctions de résumé et agrégations
     const getSeriesSummary = (data, series) => {
         const seriesData = data.filter(d => d.series === series);
-        if (seriesData.length === 0) return { avgDuration: 0, avgHR: 0, avgSpeed: 0, avgVR: 0, avgSTP: 0 };
+        if (seriesData.length === 0) return { avgDuration: 0, avgHR: 0, avgSpeed: 0, avgVR: 0, avgSTP: 0, avgCadence: 0, avgStepLength: 0, avgStanceTime: 0 };
         return {
+            // Note: Les calculs sont faits sur les nombres, le .toFixed est pour le formatage final
             avgDuration: (seriesData.reduce((acc, curr) => acc + curr.duration, 0) / seriesData.length).toFixed(1),
             avgSpeed: (seriesData.reduce((acc, curr) => acc + curr.avgSpeed, 0) / seriesData.length).toFixed(2),
             avgHR: (seriesData.reduce((acc, curr) => acc + curr.avgHR, 0) / seriesData.length).toFixed(0),
-            avgCadence: (seriesData.reduce((acc, curr) => acc + curr.avgCadence, 0) / seriesData.length).toFixed(2),
-            avgStepLength: (seriesData.reduce((acc, curr) => acc + curr.avgStepLength, 0) / seriesData.length).toFixed(2),
+            avgCadence: (seriesData.reduce((acc, curr) => acc + curr.avgCadence, 0) / seriesData.length).toFixed(2), 
+            avgStepLength: (seriesData.reduce((acc, curr) => acc + curr.avgStepLength, 0) / seriesData.length).toFixed(2), 
             avgStanceTime: (seriesData.reduce((acc, curr) => acc + curr.avgStanceTime, 0) / seriesData.length).toFixed(1), 
             avgSTP: (seriesData.reduce((acc, curr) => acc + curr.avgSTP, 0) / seriesData.length).toFixed(1), 
             avgVR: (seriesData.reduce((acc, curr) => acc + curr.avgVR, 0) / seriesData.length).toFixed(2),
@@ -100,22 +98,43 @@ const StatsTableByRep = ({ csvByLapText }) => {
     const S1 = useMemo(() => getSeriesSummary(rawPerformanceDataPerLap, 1), [rawPerformanceDataPerLap]);
     const S2 = useMemo(() => getSeriesSummary(rawPerformanceDataPerLap, 2), [rawPerformanceDataPerLap]);
     
-    // 3. Comparaison inter-séries
-    const seriesComparison = [
-        { metric: 'Avg Duration', s1: S1.avgDuration, s2: S2.avgDuration, unit: 's', trend: S2.avgDuration < S1.avgDuration ? 'Improved' : 'Stable' },
-        { metric: 'Avg Speed', s1: S1.avgSpeed, s2: S2.avgSpeed, unit: 'km/h', trend: S2.avgSpeed > S1.avgSpeed ? 'Increased' : 'Stable' },
-        { metric: 'Avg Heart Rate', s1: S1.avgHR, s2: S2.avgHR, unit: 'bpm', trend: S2.avgHR > S1.avgHR ? 'Increased' : 'Stable' },
-        { metric: 'Avg Cadence', s1: S1.avgCadence, s2: S2.avgCadence, unit: 'spm', trend: S2.avgCadence > S1.avgCadence ? 'Increased' : 'Stable' },
-        { metric: 'Avg Step length', s1: S1.avgStepLength, s2: S2.avgStepLength, unit: 'mm', trend: S2.avgStepLength > S1.avgStepLength ? 'Increased' : 'Stable' },
-        { metric: 'Avg Stance time', s1: S1.avgStanceTime, s2: S2.avgStanceTime, unit: 'ms', trend: S2.avgStanceTime < S1.avgStanceTime ? 'Improved' : 'Stable' },
-        { metric: 'Avg Stance time percent', s1: S1.avgSTP, s2: S2.avgSTP, unit: '%', trend: S2.avgSTP < S1.avgSTP ? 'Improved' : 'Stable' },
-        { metric: 'Avg Vertical ratio', s1: S1.avgVR, s2: S2.avgVR, unit: '', trend: S2.avgVR < S1.avgVR ? 'Improved' : 'Stable' },
-    ];
+    // 3. Comparaison inter-séries (incluant le calcul du Drift)
+    const seriesComparison = useMemo(() => {
+        // Fonction pour calculer le drift (valeur absolue et pourcentage)
+        // Prend en entrée les chaînes de caractères formatées (ex: '37.2', '35.9')
+        const calculateDrift = (s1Str, s2Str) => {
+            const s1Num = Number(s1Str);
+            const s2Num = Number(s2Str);
+            const driftAbsolute = s2Num - s1Num;
+            // Drift Percent (%) = (Moyenne S2 - Moyenne S1) / Moyenne S1 x 100
+            const driftPercent = s1Num !== 0 ? ((s2Num - s1Num) / s1Num) * 100 : 0;
+            return {
+                driftAbsolute: driftAbsolute.toFixed(2), // Formatage à 2 décimales pour l'affichage
+                driftPercent: driftPercent.toFixed(2),   // Formatage à 2 décimales pour l'affichage
+            };
+        };
+
+        const comparisonData = [
+            { metric: 'Avg Duration', s1: S1.avgDuration, s2: S2.avgDuration, unit: 's', trend: Number(S2.avgDuration) < Number(S1.avgDuration) ? 'Improved' : 'Stable' },
+            { metric: 'Avg Speed', s1: S1.avgSpeed, s2: S2.avgSpeed, unit: 'km/h', trend: Number(S2.avgSpeed) > Number(S1.avgSpeed) ? 'Increased' : 'Stable' },
+            { metric: 'Avg Heart Rate', s1: S1.avgHR, s2: S2.avgHR, unit: 'bpm', trend: Number(S2.avgHR) > Number(S1.avgHR) ? 'Increased' : 'Stable' },
+            { metric: 'Avg Cadence', s1: S1.avgCadence, s2: S2.avgCadence, unit: 'spm', trend: Number(S2.avgCadence) > Number(S1.avgCadence) ? 'Increased' : 'Stable' },
+            { metric: 'Avg Step length', s1: S1.avgStepLength, s2: S2.avgStepLength, unit: 'mm', trend: Number(S2.avgStepLength) > Number(S1.avgStepLength) ? 'Increased' : 'Stable' },
+            { metric: 'Avg Stance time', s1: S1.avgStanceTime, s2: S2.avgStanceTime, unit: 'ms', trend: Number(S2.avgStanceTime) < Number(S1.avgStanceTime) ? 'Improved' : 'Stable' },
+            { metric: 'Avg Stance time percent', s1: S1.avgSTP, s2: S2.avgSTP, unit: '%', trend: Number(S2.avgSTP) < Number(S1.avgSTP) ? 'Improved' : 'Stable' },
+            { metric: 'Avg Vertical ratio', s1: S1.avgVR, s2: S2.avgVR, unit: '', trend: Number(S2.avgVR) < Number(S1.avgVR) ? 'Improved' : 'Stable' },
+        ];
+
+        return comparisonData.map(item => ({
+            ...item,
+            // Ajout des valeurs de drift calculées
+            drift: calculateDrift(item.s1, item.s2),
+        }));
+    }, [S1, S2]);
 
     if (!rawPerformanceDataPerLap || rawPerformanceDataPerLap.length === 0) {
         return <div>
-          <p style={{color: '#fff'}}>Loading lap intensity data...</p>
-          {/* Un message d'erreur pourrait être ajouté ici si csvByLapText n'est pas fourni */}
+            <p style={{color: '#fff'}}>Loading lap intensity data...</p>
         </div>;
     }
 
@@ -152,8 +171,8 @@ const StatsTableByRep = ({ csvByLapText }) => {
                                         backgroundColor: '#2A2A2A' 
                                         }}>
                                         {h.label} <span style={{ fontWeight: 'normal', opacity: 0.7 }}>{h.unit}</span>
-                                    </th>
-                                ))}
+                                </th>
+                            ))}
                         </tr>
                     </thead>
                     <tbody>
@@ -187,17 +206,17 @@ const StatsTableByRep = ({ csvByLapText }) => {
                                         <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>
                                             <span style={{ fontWeight: 'bold' }}>{data.lap}</span>
                                         </td>
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.duration}</td>
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgSpeed}</td>
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.maxSpeed}</td>
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgHR}</td>
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.maxHR}</td>
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgCadence}</td>
-                                        {/* Colonnes ajoutées/corrigées */}
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgStepLength}</td>
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgStanceTime}</td>
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgSTP}</td>
-                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgVR}</td>
+                                        {/* Utilisation de toFixed() pour formater les nombres pour l'affichage */}
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.duration.toFixed(1)}</td>
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgSpeed.toFixed(2)}</td>
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.maxSpeed.toFixed(2)}</td>
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgHR.toFixed(0)}</td>
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.maxHR.toFixed(0)}</td>
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgCadence.toFixed(1)}</td>
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgStepLength.toFixed(0)}</td>
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgStanceTime.toFixed(1)}</td>
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgSTP.toFixed(2)}</td>
+                                        <td style={{ padding: '8px 5px', textAlign: 'center', border: '1px solid #333' }}>{data.avgVR.toFixed(2)}</td>
                                     </tr>
                                 </React.Fragment>
                                 );
@@ -218,11 +237,13 @@ const StatsTableByRep = ({ csvByLapText }) => {
                     display: 'flex', 
                     flexDirection: 'row',
                     justifyContent: 'space-between',
+                    flexWrap: 'wrap', // Permettre le retour à la ligne
+                    gap: '20px', 
                     }}>
                     {seriesComparison.map((item) => (
-                        <div key={item.metric} style={{fontWeight: 'bold'}}>
-                            <p>{item.metric}</p>
-                            <div>
+                        <div key={item.metric} style={{fontWeight: 'bold', minWidth: '150px'}}>
+                            <p style={{margin: '0 0 10px 0', color: '#FAFAFA', fontSize: '1.1em', borderBottom: '1px solid #333', paddingBottom: '5px'}}>{item.metric}</p>
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
                                 <div>
                                     <span style={{color: '#8884d8'}}>S1 Avg: </span>
                                     <span>{item.s1} {item.unit}</span>
@@ -230,6 +251,16 @@ const StatsTableByRep = ({ csvByLapText }) => {
                                 <div>
                                     <span style={{color: '#8884d8'}}>S2 Avg: </span>
                                     <span>{item.s2} {item.unit}</span>
+                                </div>
+                                {/* NOUVEAU: Drift Absolute */}
+                                <div>
+                                    <span style={{color: '#8884d8'}}>Drift Value: </span>
+                                    <span style={{color: '#fff'}}>{item.drift.driftAbsolute} {item.unit}</span>
+                                </div>
+                                {/* NOUVEAU: Drift Percent */}
+                                <div>
+                                    <span style={{color: '#8884d8'}}>Drift %: </span>
+                                    <span style={{color: '#fff'}}>{item.drift.driftPercent} %</span>
                                 </div>
                             </div>
                             {/* <p style={{color: '#FAFAFA'}}>{item.trend} in Series 2.</p> */}

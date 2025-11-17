@@ -51,12 +51,11 @@ const Analysis = ({ csvText, csvByLapText }) => {
       <p><strong>Initial Observations:</strong> Average speed improves from 20.57 to 22.15 km/h. Crucially, as intensity increases (evidenced by the rise in Max HR), the cadence increases (192 to 198 steps/min) and the Vertical Ratio (VR) decreases (7.95 to 7.60). This suggests an improvement in running efficiency and economy as the athlete finds their high-intensity stride.</p>
       
       {/* PACING STRATEGY */}
-      {/* TODO */}
       <h2>Impact of Pacing Strategy on Heart Rate Response</h2>
-      <p>We classified repetitions into two primary pacing strategies based on within-lap speed variance:</p>
+      <p>Repetitions were classified into two primary pacing strategies based on within-lap speed variance:</p>
       <p>Fast Start/Relax (F-R) and Progressive Build (P-B). We then compared the induced cardiac stress (Heart Rate Amplitude).</p>
-      <PacingStrategy activityDataRaw={filteredData} />
-      <p><strong>Conclusion on Pacing:</strong> The **Progressive Build (P-B)** strategy is the more effective approach. It allows the athlete to achieve a **slightly higher average speed** (21.8 km/h vs 21.5 km/h) while incurring **lower cardiac stress** (16.0 bpm vs 18.5 bpm amplitude). For precision training, the P-B strategy demonstrates better management of effort and heart rate economy.</p>
+      <PacingStrategy activityDataRaw={filteredData} activityDataByLap={csvByLapText}/>
+      <p><strong>Conclusion on Pacing:</strong> The Progressive Build (P-B) strategy is the more effective approach. It allows the athlete to achieve a slightly higher average speed (18.61 km/h vs 17.30 km/h) while only slightly increasing cardiac stress (range of 33 bpm compared to 34.7 bpm).</p>
       
       {/* RECOVERY QUALITY */}
       <h2>Recovery Quality Analysis (100m)</h2>
