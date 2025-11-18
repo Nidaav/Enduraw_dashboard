@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+
 // Assurez-vous que PapaParse est installé (npm install papaparse ou yarn add papaparse)
 import Papa from 'papaparse'; 
 
@@ -225,49 +226,6 @@ const StatsTableByRep = ({ csvByLapText }) => {
                 </table>
             </div>
 
-            {/* Overall stats */}
-            <h2>Inter-series comparison of key metrics</h2>
-            <div>
-                <div style={{
-                    backgroundColor: '#1E1E1E', 
-                    padding: '15px',
-                    borderRadius: '8px',
-                    marginBottom: '20px',
-                    border: '1px solid #333',
-                    display: 'flex', 
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap', // Permettre le retour à la ligne
-                    gap: '20px', 
-                    }}>
-                    {seriesComparison.map((item) => (
-                        <div key={item.metric} style={{fontWeight: 'bold', minWidth: '150px'}}>
-                            <p style={{margin: '0 0 10px 0', color: '#FAFAFA', fontSize: '1.1em', borderBottom: '1px solid #333', paddingBottom: '5px'}}>{item.metric}</p>
-                            <div style={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
-                                <div>
-                                    <span style={{color: '#8884d8'}}>S1 Avg: </span>
-                                    <span>{item.s1} {item.unit}</span>
-                                </div>
-                                <div>
-                                    <span style={{color: '#8884d8'}}>S2 Avg: </span>
-                                    <span>{item.s2} {item.unit}</span>
-                                </div>
-                                {/* NOUVEAU: Drift Absolute */}
-                                <div>
-                                    <span style={{color: '#8884d8'}}>Drift Value: </span>
-                                    <span style={{color: '#fff'}}>{item.drift.driftAbsolute} {item.unit}</span>
-                                </div>
-                                {/* NOUVEAU: Drift Percent */}
-                                <div>
-                                    <span style={{color: '#8884d8'}}>Drift %: </span>
-                                    <span style={{color: '#fff'}}>{item.drift.driftPercent} %</span>
-                                </div>
-                            </div>
-                            {/* <p style={{color: '#FAFAFA'}}>{item.trend} in Series 2.</p> */}
-                        </div>
-                    ))}
-                </div>
-            </div>
         </div>
     );
 };
