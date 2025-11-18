@@ -1,10 +1,13 @@
 import React, { useMemo } from 'react';
 import { useActivityData } from '../../hooks/useActivityData';
 import { useNavigate } from 'react-router-dom';
+// Charts pages
 import MultiMetricChart from '../Charts/MultiMetricChart';
-import RecoveryQuality from '../Stats/RecoveryQuality';
-import PacingStrategy from '../Stats/PacingStrategy';
 import MultiMetricChartByLap from '../Charts/MultiMetricChartByLap';
+// Stats pages
+import InterSeriesComparison  from '../Stats/InterSeriesComparison';
+import PacingStrategy from '../Stats/PacingStrategy';
+import RecoveryQuality from '../Stats/RecoveryQuality';
 import StatsTableByRep from '../Stats/StatsTableByRep';
 
 
@@ -32,30 +35,41 @@ const Analysis = ({ csvText, csvByLapText }) => {
       <h1>Data Analysis</h1>
       <h2>The session studied is as follows: 2 × [8 × (200m at high intensity pace – 100m jog recovery)]</h2>
 
+      {/* OVERALL PERFORMANCE ANALYSIS */}
       <div className="chart-container">
         <MultiMetricChart data={filteredData} timeRange={timeRange} onBrushChange={setTimeRange} />
       </div>
 
       <p>By segmenting the data from this session by lap, we will conduct an in-depth analysis of the various metrics collected.</p>
 
+      {/* PERFORMANCE ANALYSIS BY LAPS */}
       <h2>Performance analysis by laps</h2>
-
       <div className="chart-container">
         <MultiMetricChartByLap csvByLapText={csvByLapText} timeRange={timeRange} onBrushChange={setTimeRange} />
       </div>
+      
+      {/* LAPS RECAP */}
       <p>The table below summarizes the key performance indicators for the intensity laps performed during the session and are classified into series (Serie 1 and Serie 2).</p>
-
       <StatsTableByRep csvByLapText={csvByLapText}/>
 
+      {/* INTER-SERIES COMPARISON & GLOBAL DRIFTS */}
+      <InterSeriesComparison csvByLapText={csvByLapText} />
+      <p>The comparison between S1 and S2 highlights a clear progression in running efficiency. While cardiovascular demand increases markedly, the biomechanical indicators reveal a more effective and economical stride.</p>
 
-      <p><strong>Initial Observations:</strong> Average speed improves from 20.57 to 22.15 km/h. Crucially, as intensity increases (evidenced by the rise in Max HR), the cadence increases (192 to 198 steps/min) and the Vertical Ratio (VR) decreases (7.95 to 7.60). This suggests an improvement in running efficiency and economy as the athlete finds their high-intensity stride.</p>
+      <p>More specifically, S2 shows :
+        <span style={{display: 'block'}}>A noticeable gain in speed, supported by higher cadence and improved ground reactivity.</span>
+        <span style={{display: 'block'}}>A slightly longer stride, contributing to better forward propulsion.</span>
+        <span style={{display: 'block'}}>An expected rise in heart rate, reflecting a stronger physiological investment to sustain performance.</span>
+        <span style={{display: 'block'}}>A reduction in vertical ratio, indicating enhanced running economy and reduced vertical oscillation.</span>
+      </p>
       
       {/* PACING STRATEGY */}
       <h2>Impact of Pacing Strategy on Heart Rate Response</h2>
-      <p>Repetitions were classified into two primary pacing strategies based on within-lap speed variance:</p>
-      <p>Fast Start/Relax (F-R) and Progressive Build (P-B). We then compared the induced cardiac stress (Heart Rate Amplitude).</p>
+      <p>The repetitions are classified into two main pace strategies based on the speed variance within a lap: <strong>Steady</strong> and <strong>Unsteady</strong> pace. These were classified using <strong>pacing drift (Δ%)</strong>, specifically its median (9.15). We then compared the induced cardiac stress (heart rate amplitude).</p>
       <PacingStrategy activityDataRaw={filteredData} activityDataByLap={csvByLapText}/>
-      <p><strong>Conclusion on Pacing:</strong> The Progressive Build (P-B) strategy is the more effective approach. It allows the athlete to achieve a slightly higher average speed (18.61 km/h vs 17.30 km/h) while only slightly increasing cardiac stress (range of 33 bpm compared to 34.7 bpm).</p>
+      <p><strong>Pacing analysis:</strong> Contrary to expectations, the laps completed using a regular strategy performed less well. In fact, they were 0.16 km/h slower and, more importantly, resulted in an average increase of 7 bpm in heart rate amplitude per repetition.
+        Irregular repetitions therefore seem to be more suitable for the athlete who completed this session. It is interesting to note that the ninth repetition was identified as “steady” and had a significant impact on the average “HR amplitude” as it occurred just after the inter-set recovery.
+        Further analysis could be useful to determine which type of “unsteady” repetition is best suited to the athlete.</p>
       
       {/* RECOVERY QUALITY */}
       <h2>Recovery Quality Analysis (100m)</h2>

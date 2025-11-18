@@ -216,7 +216,7 @@ const PacingStrategyTable = ({ activityDataRaw = [], activityDataByLap = null, t
         borderRadius: 8,
         border: '1px solid #333'
       }}>
-        <h3 style={{ marginTop: 0 }}>Synthèse Pacing Strategy (Steady vs Unsteady)</h3>
+        <h3 style={{ marginTop: 0 }}> Summary of the pace strategy (Steady vs Unsteady)</h3>
 
         <table style={{ borderCollapse: 'collapse', width: '100%', color: '#FAFAFA' }}>
           <thead>
