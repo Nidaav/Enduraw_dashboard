@@ -1,108 +1,178 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
 const Planning = () => {
-    const [date, setDate] = useState(new Date());
-    const [showPopup, setShowPopup] = useState(false);
-    const [selectedWorkout, setSelectedWorkout] = useState(null);
+  const [date, setDate] = useState(new Date());
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
 
-    // Données d'entraînement
-    const trainingSessions = [
-        { date: '2025-10-20', workout: 'Basic endurance (1h)', details: 'Steady pace, 60-70% Max Heart Rate.' },
-        { date: '2025-10-21', workout: 'Interval training session on track (5 x 1000m)', details: 'Run 5 repetitions of 1000m at 90% Max Heart Rate, with 2-minute jog recovery.' },
-        { date: '2025-10-23', workout: 'Double session day : Basic endurance (30min) & Strength Training', details: 'Very light run at 60% Max Heart Rate just to deeply warm up the muscles. Then a trail-oriented strength training session. Working the legs in concentric and eccentric movements, as well as the core and overall stability.' },
-        { date: '2025-10-24', workout: 'Basic endurance (45min)', details: 'Steady pace, 60-70% Max Heart Rate.' },
-        { date: '2025-10-25', workout: 'Interval training session on trail (3 x 6min uphill)', details: 'Find a consistant hill. Set yourself around 85%-90% for 6 minutes, then walk/jog down for recovery. Focus on maintaining power throughout the interval.' },
-        { date: '2025-10-26', workout: 'Long run (1h30)', details: 'Aerobic zone: bring a small backpack with sports drinks and food to simulate race conditions.' },
+  const formatDate = (d) => d.toISOString().slice(0, 10);
+
+  const trainingSessions = useMemo(() => {
+    const start = new Date();
+    start.setDate(start.getDate());
+
+    const workouts = [
+      {
+        workout: 'Easy endurance run (45–60min)',
+        details: 'Steady pace, 60–70% Max Heart Rate.'
+      },
+      {
+        workout: 'Interval session (14 × 400m)',
+        details: 'Fast 400m at 90% MHR, with 200m jog recovery.'
+      },
+      {
+        workout: 'Hill session (6 × 3min uphill)',
+        details: 'Strong effort at 85–90% MHR. Jog down for recovery.'
+      },
+      {
+        workout: 'Strength & conditioning (40min)',
+        details: 'Focus on eccentric control, core stability and trail-specific strength.'
+      },
+      {
+        workout: 'Rest day or active mobility',
+        details: 'Optional light stretching or walk.'
+      },
+      {
+        workout: 'Recovery run (30–40min)',
+        details: 'Very easy pace, full conversational effort.'
+      },
+      {
+        workout: 'Long run (1h20–1h40)',
+        details: 'Aerobic, steady effort. Bring hydration & fuel.'
+      },
+      {
+        workout: 'Tempo run (20min at controlled intensity)',
+        details: 'Run at 80–85% MHR to build lactate threshold.'
+      },
+      {
+        workout: 'Mixed trail session (50–70min)',
+        details: 'Varied terrain, moderate effort, focus on running technique.'
+      },
+      {
+        workout: 'Plyometrics & drills',
+        details: 'Short session: strides, skips, hops, and agility work.'
+      },
+      {
+        workout: 'Progressive run (45min)',
+        details: 'Increase pace every 10–15min, finishing strong but controlled.'
+      },
+      {
+        workout: 'Interval session (8 × 1000m)',
+        details: 'Perform at 88–92% MHR with 2min jog recovery.'
+      },
+      {
+        workout: 'Rest day or active mobility',
+        details: 'Optional light stretching or walk.'
+      },
+      {
+        workout: 'Trail fartlek (45–60min)',
+        details: 'Alternate moderate and strong efforts based on terrain.'
+      },
+      {
+        workout: 'Endurance + strides',
+        details: '40min easy + 9 × 15s relaxed accelerations.'
+      },
+      {
+        workout: 'Race pace rehearsal (4 × 6min)',
+        details: 'Run close to target trail race intensity with controlled breathing.'
+      },
     ];
 
-    const findWorkout = (dateString) => {
-        return trainingSessions.find((s) => s.date === dateString);
-    };
+    return workouts.map((w, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return {
+        ...w,
+        date: formatDate(d)
+      };
+    });
+  }, []);
 
-    const handleDayClick = (clickedDate) => {
-        setDate(clickedDate);
-        const dateString = clickedDate.toISOString().slice(0, 10);
-        
-        const session = findWorkout(dateString);
+  // --- Find session by date ---
+  const findWorkout = (dateString) => {
+    return trainingSessions.find((s) => s.date === dateString);
+  };
 
-        if (session) {
-            setSelectedWorkout(session);
-            setShowPopup(true); 
-        }
-    };
+  const handleDayClick = (clickedDate) => {
+    setDate(clickedDate);
 
+    const dateString = formatDate(clickedDate);
+    const session = findWorkout(dateString);
 
-    const tileContent = ({ date, view }) => {
-        if (view === 'month') { 
-            const session = trainingSessions.find((s) => s.date === date.toISOString().slice(0, 10));
+    if (session) {
+      setSelectedWorkout(session);
+      setShowPopup(true);
+    }
+  };
 
-            if (session) {
-              return (
-                <div className="training-dot">
-                  <span className="training-label">{session.workout}</span>
-                </div>
-              );
-            }
+  const tileContent = ({ date, view }) => {
+    if (view === 'month') {
+      const session = trainingSessions.find((s) => s.date === formatDate(date));
 
-        }
-        return null;
-    };
-    
-    const tileClassName = ({ date, view }) => {
-        if (view === 'month') {
-            const dateString = date.toISOString().slice(0, 10);
-            const hasSession = findWorkout(dateString);
-            return hasSession ? 'has-workout' : '';
-        }
-    };
+      if (session) {
+        return (
+          <div className="training-dot">
+            <span className="training-label">{session.workout}</span>
+          </div>
+        );
+      }
+    }
+    return null;
+  };
 
+  const tileClassName = ({ date, view }) => {
+    if (view === 'month') {
+      const dateString = formatDate(date);
+      const hasSession = findWorkout(dateString);
+      return hasSession ? 'has-workout' : '';
+    }
+  };
 
-    return (
-        <div className="page-container">
-            <h1>Training Plan</h1>
-            <h4>Here is a suggested training program that will help you achieve your goals.</h4>
-            <h4>The first week is available and free of charge. To access the rest of the plan, subscribe to Enduraw® personalized support.</h4>
-            
-            <div className="calendar-container">
-                <Calendar 
-                    onChange={setDate}
-                    value={date}
-                    locale="en-US"
-                    view="month" 
-                    showNumberOfWeeks={1} 
-                    onClickDay={handleDayClick} 
-                    tileContent={tileContent}
-                    tileClassName={tileClassName}
-                />
-            </div>
+  return (
+    <div className="page-container">
+      <h1>Training Plan</h1>
+      <h4>Here is a suggested training program that will help you achieve your goals.</h4>
+      <h4>The first fortnight is available and free of charge. To access the rest of the plan, subscribe to Enduraw® personalized support.</h4>
 
-            {/* Composant Pop-up */}
-            {showPopup && selectedWorkout && (
-                <>
-                    <div className="modal-overlay" onClick={() => setShowPopup(false)} />
-                    <div className="modal-content">
-                        <h2>{selectedWorkout.workout}</h2>
-                        <h4><strong>Date:</strong> {new Date(selectedWorkout.date).toLocaleDateString('en-US')}</h4>
-                        <h4>{selectedWorkout.details}</h4>
-                        <button onClick={() => setShowPopup(false)}>
-                            Close
-                        </button>
-                    </div>
-                </>
-            )}
+      <div className="calendar-container">
+        <Calendar
+          onChange={setDate}
+          value={date}
+          locale="en-US"
+          view="month"
+          showNumberOfWeeks={1}
+          onClickDay={handleDayClick}
+          tileContent={tileContent}
+          tileClassName={tileClassName}
+        />
+      </div>
 
-            <h4>The proposed plan is for guidance only. It aims to improve your performance in short trail runs but does not take into account your specific physical characteristics, training load, lifestyle, or daily constraints.</h4>
-            <h4>For a tailor-made plan and to discuss your goals with a coach, subscribe to Enduraw® personalized support. </h4>
+      {/* Popup */}
+      {showPopup && selectedWorkout && (
+        <>
+          <div className="modal-overlay" onClick={() => setShowPopup(false)} />
+          <div className="modal-content">
+            <h2>{selectedWorkout.workout}</h2>
+            <h4><strong>Date:</strong> {new Date(selectedWorkout.date).toLocaleDateString('en-US')}</h4>
+            <h4>{selectedWorkout.details}</h4>
+            <button onClick={() => setShowPopup(false)}>Close</button>
+          </div>
+        </>
+      )}
 
-            <div className="button-container">
-                <button className="training-plan-button">
-                    Become an Enduraw® customer
-                </button>
-            </div>
-        </div>
-    );
+      <h4>The proposed plan is for guidance only. It aims to improve your performance in short trail runs but does not take into account your specific physical characteristics, training load, lifestyle, or daily constraints.</h4>
+
+      <h4>For a tailor-made plan and to discuss your goals with a coach, subscribe to Enduraw® personalized support.</h4>
+
+      <div className="button-container">
+        <button className="training-plan-button">
+          Become an Enduraw® customer
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default Planning;
