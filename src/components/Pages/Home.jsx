@@ -20,26 +20,53 @@ const Home = () => {
   };
 
   // Gère le clic sur "Get Started"
-  const handleStart = () => {
+  const handleStart = async () => { // **Ajouter 'async' ici**
     if (!selectedFile) {
       alert("Veuillez importer un fichier .fit avant de commencer l'analyse.");
       return;
     }
-
-    // Ici, vous naviguerez vers la page d'analyse appropriée
-    // en fonction du type de séance sélectionné et du fichier.
     
-    // Pour l'exemple, nous allons vers '/stats' comme avant,
-    // mais dans un vrai scénario, vous pourriez utiliser une logique comme :
-    // if (sessionType === 'Interval') { navigate('/stats/interval', { state: { file: selectedFile } }); }
-    // else if (sessionType === 'Trail') { navigate('/stats/trail', { state: { file: selectedFile } }); }
-    // else if (sessionType === 'Road') { navigate('/stats/road', { state: { file: selectedFile } }); }
+    // --- NOUVEAU : Préparation des données pour l'envoi ---
+    const formData = new FormData();
+    // 'fitFile' doit correspondre au nom du champ utilisé dans Multer sur le serveur
+    formData.append('fitFile', selectedFile); 
+    formData.append('sessionType', sessionType);
 
-    // Pour l'instant, on navigue vers /stats et on suppose que 
-    // l'étape suivante gérera le fichier et le type.
-    console.log(`Fichier sélectionné: ${selectedFile.name}`);
-    console.log(`Type de séance sélectionné: ${sessionType}`);
-    navigate('/stats', { state: { file: selectedFile, sessionType: sessionType } });
+    // Mettez le bouton en état de chargement si vous implémentez l'état `isLoading`
+    // setIsLoading(true);
+
+    try {
+        // Envoi du fichier au serveur backend (port 5000)
+        const response = await fetch('http://localhost:5000/upload', {
+            method: 'POST',
+            body: formData, // Les données Form Data sont envoyées
+            // Le Content-Type est automatiquement géré par le navigateur avec FormData
+        });
+
+        // Vérification de la réponse
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Réponse du serveur:", data);
+
+        // --- Navigation après Succès ---
+        // Une fois que le serveur confirme le stockage, on navigue.
+        // On pourrait passer des informations de `data` (comme le nom de fichier stocké) à la page /stats
+        navigate('/stats', { state: { 
+            uploadedFilePath: data.filePath, 
+            sessionType: sessionType,
+            originalName: data.originalName
+        }});
+
+
+    } catch (error) {
+        console.error("Erreur lors de l'envoi du fichier:", error);
+        alert(`Échec de l'analyse. Erreur: ${error.message}`);
+    } finally {
+        // setIsLoading(false);
+    }
   };
 
   return (
