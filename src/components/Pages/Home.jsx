@@ -6,11 +6,11 @@ const Home = () => {
   // État pour stocker le fichier sélectionné
   const [selectedFile, setSelectedFile] = useState(null);
   // État pour stocker le type de séance sélectionné
-  const [sessionType, setSessionType] = useState('Interval'); // 'Interval' par défaut pour le fractionné (outil actuel)
+  const [sessionType, setSessionType] = useState('Interval'); 
+  const [isLoading, setIsLoading] = useState(false); // Nouveau: état de chargement
 
   // Gère la sélection du fichier par l'utilisateur
   const handleFileChange = (event) => {
-    // Ne prend que le premier fichier (il ne devrait y en avoir qu'un)
     setSelectedFile(event.target.files[0]);
   };
 
@@ -20,52 +20,51 @@ const Home = () => {
   };
 
   // Gère le clic sur "Get Started"
-  const handleStart = async () => { // **Ajouter 'async' ici**
+  const handleStart = async () => {
     if (!selectedFile) {
       alert("Veuillez importer un fichier .fit avant de commencer l'analyse.");
       return;
     }
     
-    // --- NOUVEAU : Préparation des données pour l'envoi ---
+    setIsLoading(true); // Démarrer le chargement
+    
+    // Préparation des données pour l'envoi
     const formData = new FormData();
-    // 'fitFile' doit correspondre au nom du champ utilisé dans Multer sur le serveur
     formData.append('fitFile', selectedFile); 
     formData.append('sessionType', sessionType);
-
-    // Mettez le bouton en état de chargement si vous implémentez l'état `isLoading`
-    // setIsLoading(true);
 
     try {
         // Envoi du fichier au serveur backend (port 5000)
         const response = await fetch('http://localhost:5000/upload', {
             method: 'POST',
-            body: formData, // Les données Form Data sont envoyées
-            // Le Content-Type est automatiquement géré par le navigateur avec FormData
+            body: formData, 
         });
 
-        // Vérification de la réponse
+        const data = await response.json();
+
         if (!response.ok) {
-            throw new Error(`Erreur HTTP: ${response.status}`);
+            // Si le statut HTTP est un échec (ex: 500), lève une erreur.
+            const errorMessage = data.errorDetails || data.message || `Erreur HTTP: ${response.status}`;
+            throw new Error(errorMessage);
         }
 
-        const data = await response.json();
-        console.log("Réponse du serveur:", data);
-
-        // --- Navigation après Succès ---
-        // Une fois que le serveur confirme le stockage, on navigue.
-        // On pourrait passer des informations de `data` (comme le nom de fichier stocké) à la page /stats
-        navigate('/stats', { state: { 
-            uploadedFilePath: data.filePath, 
-            sessionType: sessionType,
-            originalName: data.originalName
-        }});
+        console.log("Analyse réussie. Réponse du serveur:", data);
+        
+        // Navigation après Succès, en passant les chemins des CSV stockés dans le backend
+        navigate('/stats', { 
+            state: { 
+                recordsCsvPath: data.recordsCsvPath,
+                lapsCsvPath: data.lapsCsvPath,
+                sessionType: sessionType
+            } 
+        });
 
 
     } catch (error) {
-        console.error("Erreur lors de l'envoi du fichier:", error);
+        console.error("Échec de l'analyse:", error);
         alert(`Échec de l'analyse. Erreur: ${error.message}`);
     } finally {
-        // setIsLoading(false);
+        setIsLoading(false); // Arrêter le chargement, que ce soit un succès ou un échec
     }
   };
 
@@ -112,11 +111,11 @@ const Home = () => {
       {/* --- Bouton de Démarrage --- */}
       <p className="home-subtitle">L'analyse de votre dernière session est prête.</p>
       <button 
-        className={`start-button ${!selectedFile ? 'disabled' : ''}`} // Optionnel: désactiver si pas de fichier
+        className={`start-button ${(!selectedFile || isLoading) ? 'disabled' : ''}`}
         onClick={handleStart}
-        disabled={!selectedFile} // Désactiver si aucun fichier n'est sélectionné
+        disabled={!selectedFile || isLoading} // Désactiver si aucun fichier n'est sélectionné OU si chargement en cours
       >
-        Get Started
+        {isLoading ? 'Analyse en cours...' : 'Get Started'}
       </button>
       
     </div>
