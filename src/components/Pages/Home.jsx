@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const navigate = useNavigate();
-  // État pour stocker le fichier sélectionné
   const [selectedFile, setSelectedFile] = useState(null);
-  // État pour stocker le type de séance sélectionné
   const [sessionType, setSessionType] = useState('Interval'); 
   const [isLoading, setIsLoading] = useState(false); // Nouveau: état de chargement
 
@@ -81,7 +79,7 @@ const Home = () => {
         <input 
           type="file" 
           id="fit-file-upload" 
-          accept=".fit" // N'accepter que les fichiers .fit
+          accept=".fit"
           onChange={handleFileChange}
           className="file-input"
         />
@@ -113,7 +111,7 @@ const Home = () => {
       <button 
         className={`start-button ${(!selectedFile || isLoading) ? 'disabled' : ''}`}
         onClick={handleStart}
-        disabled={!selectedFile || isLoading} // Désactiver si aucun fichier n'est sélectionné OU si chargement en cours
+        disabled={!selectedFile || isLoading}
       >
         {isLoading ? 'Analyse en cours...' : 'Get Started'}
       </button>
