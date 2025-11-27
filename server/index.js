@@ -20,14 +20,6 @@ const uploadDir = path.join(__dirname, 'uploads');
 const resultsDir = path.join(__dirname, 'results');
 const PYTHON_SCRIPT_PATH = path.join(__dirname, 'extract_fit_file.py'); 
 
-// Créer les dossiers d'uploads et results s'ils n'existent pas
-if (!fs.existsSync(uploadDir)){
-    fs.mkdirSync(uploadDir);
-}
-if (!fs.existsSync(resultsDir)){
-    fs.mkdirSync(resultsDir);
-}
-
 // --- Configuration du stockage pour Multer ---
 const storage = multer.diskStorage({
   // Stocker dans le dossier 'uploads'

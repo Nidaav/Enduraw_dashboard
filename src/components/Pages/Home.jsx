@@ -18,7 +18,11 @@ const Home = () => {
   };
 
   // Gère le clic sur "Get Started"
-  const handleStart = async () => {
+  const handlestart = () => {
+    navigate('/stats')
+  }
+  const handleStartWithImport = async () => {
+    // Le handlestart une fois que je traiterais les fichiers que j'importe
     if (!selectedFile) {
       alert("Veuillez importer un fichier .fit avant de commencer l'analyse.");
       return;
@@ -69,49 +73,58 @@ const Home = () => {
   return (
     <div className="home-container">
       <h1 className="home-title">ANALYZE YOUR PERFORMANCES WITH ENDURAW<span className="registered-symbol">®</span></h1>
+      <div className="chart-container">
+        <h4>Début de la Version 3</h4>
+        {/* --- Importation de Fichier --- */}
+        <div className="file-importer">
+          <label htmlFor="fit-file-upload" className="file-upload-label">
+            Importer un fichier d'activité (.fit) :
+          </label>
+          <input 
+            type="file" 
+            id="fit-file-upload" 
+            accept=".fit"
+            onChange={handleFileChange}
+            className="file-input"
+          />
+          {selectedFile && (
+            <p className="selected-file-info">
+              Fichier sélectionné : **{selectedFile.name}**
+            </p>
+          )}
+        </div>
+
+        {/* --- Sélecteur de Type de Séance --- */}
+        <div className="session-type-selector">
+          <label htmlFor="session-type">Choisir le type de séance :</label>
+          <select 
+            id="session-type" 
+            value={sessionType} 
+            onChange={handleSessionTypeChange}
+            className="select-input"
+          >
+            <option value="Interval">Fractionné (Piste)</option>
+            <option value="Road">Course sur Route</option>
+            <option value="Trail">Course de Trail</option>
+          </select>
+        </div>
+        <button 
+          className={`start-button ${(!selectedFile || isLoading) ? 'disabled' : ''}`}
+          disabled={!selectedFile || isLoading}
+          onClick={handleStartWithImport}
+          >
+          {isLoading ? 'Analyse en cours...' : 'Get Started'}
+        </button>
+
+      </div>
+
       <p className="home-subtitle">Make data accessible and bring lisibility to our sports.</p>
-      
-      {/* --- Importation de Fichier --- */}
-      <div className="file-importer">
-        <label htmlFor="fit-file-upload" className="file-upload-label">
-          Importer un fichier d'activité (.fit) :
-        </label>
-        <input 
-          type="file" 
-          id="fit-file-upload" 
-          accept=".fit"
-          onChange={handleFileChange}
-          className="file-input"
-        />
-        {selectedFile && (
-          <p className="selected-file-info">
-            Fichier sélectionné : **{selectedFile.name}**
-          </p>
-        )}
-      </div>
-
-      {/* --- Sélecteur de Type de Séance --- */}
-      <div className="session-type-selector">
-        <label htmlFor="session-type">Choisir le type de séance :</label>
-        <select 
-          id="session-type" 
-          value={sessionType} 
-          onChange={handleSessionTypeChange}
-          className="select-input"
-        >
-          <option value="Interval">Fractionné (Piste)</option>
-          <option value="Road">Course sur Route</option>
-          <option value="Trail">Course de Trail</option>
-        </select>
-      </div>
-
 
       {/* --- Bouton de Démarrage --- */}
-      <p className="home-subtitle">L'analyse de votre dernière session est prête.</p>
+      <p className="home-subtitle">The analysis of your last session is ready.</p>
       <button 
-        className={`start-button ${(!selectedFile || isLoading) ? 'disabled' : ''}`}
-        onClick={handleStart}
-        disabled={!selectedFile || isLoading}
+        className={`start-button`}
+        onClick={handlestart}
       >
         {isLoading ? 'Analyse en cours...' : 'Get Started'}
       </button>
