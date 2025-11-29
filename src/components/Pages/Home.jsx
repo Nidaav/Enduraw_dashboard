@@ -95,7 +95,7 @@ const Home = () => {
         </div>
 
         {/* --- Sélecteur de Type de Séance --- */}
-        <div className="session-type-selector">
+        {/* <div className="session-type-selector">
           <label htmlFor="session-type">Choisir le type de séance :</label>
           <select 
             id="session-type" 
@@ -107,7 +107,7 @@ const Home = () => {
             <option value="Road">Course sur Route</option>
             <option value="Trail">Course de Trail</option>
           </select>
-        </div>
+        </div> */}
         <button 
           className={`start-button ${(!selectedFile || isLoading) ? 'disabled' : ''}`}
           disabled={!selectedFile || isLoading}
